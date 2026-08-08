@@ -667,7 +667,13 @@ Pages
    different content. Content moved to `src/content/*` (process, pricing, testimonials,
    faq, technologies, comparison). **The v1 tree was deleted at this point** — recoverable
    via `git checkout 5294b6b -- <path>`.
-6. Services index + 7 detail pages
+6. ~~Services index + 7 detail pages~~ **DONE — 7/7 service pages pass (382–472 words
+   each, `Service` + `BreadcrumbList` schema).** Composition per §4.4: overview + proof
+   metrics, four explained capabilities, stack, related work, process strip, service FAQ,
+   onward navigation, CTA. Related case studies are derived from `caseStudies.js` by slug
+   rather than listed on the service, so the two data sets cannot contradict each other.
+   Two case studies added (Vantage Retail, Halden Energy) because mobile and web had no
+   related work and `/work` was thin at three.
 7. Work index + case studies
 8. About, Process, Pricing, Contact
 9. Insights, Legal, 404
