@@ -75,6 +75,29 @@ export const faqJsonLd = {
   })),
 };
 
+/**
+ * Service schema for a service detail page. Generated from the same content
+ * the page renders, for the same reason as faqJsonLd.
+ */
+export function serviceJsonLd(service) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: service.title,
+    description: service.tagline,
+    url: `${BASE_URL}/services/${service.slug}`,
+    provider: { "@type": "Organization", name: SITE, url: BASE_URL },
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: `${service.title} capabilities`,
+      itemListElement: service.pillars.map((p) => ({
+        "@type": "Offer",
+        itemOffered: { "@type": "Service", name: p.title, description: p.body },
+      })),
+    },
+  };
+}
+
 export function breadcrumbJsonLd(trail) {
   return {
     "@context": "https://schema.org",

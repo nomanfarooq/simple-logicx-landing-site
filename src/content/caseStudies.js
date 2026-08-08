@@ -45,6 +45,34 @@ export const caseStudies = [
       { label: "Reconciliation drift", value: "0" },
     ],
   },
+  {
+    slug: "vantage-retail",
+    client: "Vantage Retail",
+    sector: "Retail",
+    title: "An offline-first store app used across 1,200 locations",
+    summary:
+      "Stock, returns and price checks that keep working through the dead spots at the back of every warehouse.",
+    services: ["mobile", "cloud"],
+    metrics: [
+      { label: "Locations live", value: "1,200" },
+      { label: "Offline transactions", value: "18%" },
+      { label: "Sync conflicts lost", value: "0" },
+    ],
+  },
+  {
+    slug: "halden-energy",
+    client: "Halden Energy",
+    sector: "Utilities",
+    title: "A regulated customer portal that passed accessibility audit first time",
+    summary:
+      "Rebuilding a 400-page self-service portal to WCAG 2.2 AA with a performance budget enforced in CI.",
+    services: ["web", "saas"],
+    metrics: [
+      { label: "Lighthouse performance", value: "98" },
+      { label: "Largest contentful paint", value: "1.4s" },
+      { label: "Audit findings", value: "0" },
+    ],
+  },
 ];
 
 export const caseStudyBySlug = Object.fromEntries(
