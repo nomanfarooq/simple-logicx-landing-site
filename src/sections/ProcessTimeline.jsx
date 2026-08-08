@@ -1,98 +1,109 @@
-import { useRef, useEffect } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Lightbulb, Search, Code, Rocket, TrendingUp } from 'lucide-react'
+import { useRef } from "react";
+import Section from "../components/ui/Section";
+import SectionHeader from "../components/ui/SectionHeader";
+import Reveal from "../components/motion/Reveal";
+import { gsap, useGSAP } from "../lib/gsap";
+import { usePrefersReducedMotion } from "../hooks/useMediaQuery";
+import { processSteps } from "../content/process";
 
-const steps = [
-  {
-    step: '01',
-    icon: Lightbulb,
-    title: 'Discovery',
-    description: 'We dive deep into your vision, market, users, and technical requirements. Outcome: a clear product blueprint.',
-  },
-  {
-    step: '02',
-    icon: Search,
-    title: 'Design & Architecture',
-    description: 'UX wireframes, system architecture, and technology stack selection. Every decision is intentional.',
-  },
-  {
-    step: '03',
-    icon: Code,
-    title: 'Development',
-    description: 'Two-week agile sprints with continuous integration. You see progress every iteration — no black boxes.',
-  },
-  {
-    step: '04',
-    icon: Rocket,
-    title: 'Launch',
-    description: 'Production deployment with monitoring, performance optimization, and zero-downtime strategies.',
-  },
-  {
-    step: '05',
-    icon: TrendingUp,
-    title: 'Growth & Iteration',
-    description: 'Data-driven feature development, A/B testing, and infrastructure scaling as your user base grows.',
-  },
-]
+/**
+ * Process timeline with a scroll-drawn spine.
+ *
+ * This is the page's one signature scroll effect (§5.5 caps it at one per
+ * page): the vertical line scales from 0 to 1 as the section passes, scrubbed
+ * against scroll. GSAP rather than Framer because it is scroll-LINKED.
+ *
+ * The line is decorative. Under reduced motion it renders fully drawn rather
+ * than animating, so the visual structure survives without the movement.
+ */
+export default function ProcessTimeline({ showHeader = true }) {
+  const scope = useRef(null);
+  const line = useRef(null);
+  const reduceMotion = usePrefersReducedMotion();
 
-export default function ProcessTimeline() {
-  const sectionRef = useRef(null)
+  useGSAP(
+    () => {
+      if (reduceMotion || !line.current) return;
+      gsap.fromTo(
+        line.current,
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          ease: "none",
+          scrollTrigger: {
+            trigger: scope.current,
+            start: "top 65%",
+            end: "bottom 75%",
+            scrub: 0.6,
+            invalidateOnRefresh: true,
+          },
+        },
+      );
+    },
+    { scope, dependencies: [reduceMotion] },
+  );
 
   return (
-    <section ref={sectionRef} className="relative py-32 bg-dark-900">
-      <div className="max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-20" id="process-header">
-          <span className="inline-block px-4 py-1.5 rounded-full border border-gold/30 bg-gold/10 text-gold text-sm font-medium mb-6">
-            Our Process
-          </span>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-            From Idea to{' '}
-            <span className="bg-gradient-to-r from-gold to-amber bg-clip-text text-transparent">Impact</span>
-          </h2>
-          <p className="mt-6 text-gray-400 max-w-2xl mx-auto text-lg">
-            A battle-tested process refined over 150+ projects. Predictable delivery, exceptional quality.
-          </p>
+    <Section>
+      {/* Suppressed on /process, where the page header already says this —
+          the section is shared, so the heading has to be optional. */}
+      {showHeader && (
+        <SectionHeader
+          eyebrow="Process"
+          title="Five phases, no surprises"
+          lead="Every engagement runs the same shape. You always know what happens next and what it costs."
+        />
+      )}
+
+      <div ref={scope} className={showHeader ? "relative mt-16 md:mt-20" : "relative"}>
+        {/* Spine — sits behind the steps, hidden from assistive tech. */}
+        <div
+          aria-hidden="true"
+          className="absolute left-[19px] top-2 hidden h-[calc(100%-1rem)] w-px bg-line md:block"
+        >
+          <div
+            ref={line}
+            className="grad-primary h-full w-full origin-top"
+            style={{ transform: reduceMotion ? "scaleY(1)" : "scaleY(0)" }}
+          />
         </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-cyan via-lime to-gold opacity-30" />
+        <ol className="flex flex-col gap-10">
+          {processSteps.map((step) => (
+            <li key={step.n}>
+              <Reveal direction="up" amount={0.3}>
+                <div className="grid gap-5 md:grid-cols-[40px_1fr] md:gap-8">
+                  <span className="relative z-10 grid size-10 place-items-center rounded-full border border-line bg-base font-mono text-xs font-semibold text-accent">
+                    {step.n}
+                  </span>
 
-          {steps.map((step, i) => (
-            <div
-              key={i}
-              id={`process-step-${i}`}
-              className={`relative flex flex-col md:flex-row items-start md:items-center gap-8 mb-16 ${
-                i % 2 === 0 ? 'md:flex-row-reverse' : ''
-              }`}
-            >
-              {/* Content card */}
-              <div className="ml-20 md:ml-0 md:w-[calc(50%-2rem)]">
-                <div className={`p-8 rounded-2xl border border-dark-600/50 bg-dark-700/30 backdrop-blur-sm hover:border-cyan/20 transition-all ${
-                  i % 2 === 0 ? 'md:text-right' : 'md:text-left'
-                }`}>
-                  <div className={`flex items-center gap-4 mb-4 ${
-                    i % 2 === 0 ? 'md:justify-end' : 'md:justify-start'
-                  }`}>
-                    <span className="text-xs font-mono text-cyan">STEP {step.step}</span>
-                    <step.icon className="w-5 h-5 text-cyan" />
+                  <div className="rounded-(--radius-card) border border-line bg-surface p-7">
+                    <div className="flex flex-wrap items-baseline justify-between gap-3">
+                      <h3 className="font-display text-xl font-semibold text-ink">
+                        {step.title}
+                      </h3>
+                      <span className="font-mono text-xs text-ink-muted">
+                        {step.duration}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-ink-muted">{step.body}</p>
+                    <ul className="mt-5 flex flex-wrap gap-2">
+                      {step.deliverables.map((d) => (
+                        <li
+                          key={d}
+                          className="rounded-(--radius-pill) border border-line bg-base px-3 py-1 text-xs text-ink-soft"
+                        >
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <h3 className="text-2xl font-semibold mb-3">{step.title}</h3>
-                  <p className="text-gray-400 leading-relaxed">{step.description}</p>
                 </div>
-              </div>
-
-              {/* Center dot */}
-              <div className="absolute left-8 md:left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-cyan border-4 border-dark-900 z-10" />
-            </div>
+              </Reveal>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
-
-      {/* GSAP animations injected via useEffect in App */}
-    </section>
-  )
+    </Section>
+  );
 }

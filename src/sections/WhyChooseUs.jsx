@@ -1,129 +1,107 @@
-import { useRef, useEffect } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { Check, X } from 'lucide-react'
+import { Check, X } from "lucide-react";
+import Section from "../components/ui/Section";
+import SectionHeader from "../components/ui/SectionHeader";
+import { RevealGroup, RevealItem } from "../components/motion/Reveal";
+import { comparison } from "../content/comparison";
 
-const comparisons = [
-  { feature: 'Dedicated engineering team', competitor: false, us: true },
-  { feature: 'Transparent milestone tracking', competitor: false, us: true },
-  { feature: 'Post-launch support & maintenance', competitor: false, us: true },
-  { feature: 'Custom architecture per project', competitor: false, us: true },
-  { feature: 'AI-first design approach', competitor: false, us: true },
-  { feature: 'Generic templates', competitor: true, us: false },
-  { feature: 'Hidden costs & scope creep', competitor: true, us: false },
-  { feature: 'No post-delivery support', competitor: true, us: false },
-]
-
+/**
+ * Comparison table.
+ *
+ * A real <table> with proper headers, not a grid of divs. Screen-reader users
+ * navigating this by cell need to know which column they are in — "Typical
+ * agency" versus "SimpleLogicX" is the entire point of the section, and a div
+ * grid throws that relationship away.
+ *
+ * On narrow viewports the same data re-renders as stacked cards, because a
+ * three-column table at 375px is unreadable for everyone.
+ */
 export default function WhyChooseUs() {
-  const sectionRef = useRef(null)
-
-  useEffect(() => {
-    const anims = []
-
-    // Reveal header
-    const reveal = document.querySelector('[data-reveal]')
-    if (reveal) {
-      anims.push(
-        gsap.fromTo(reveal, { opacity: 0, y: 30 }, {
-          opacity: 1, y: 0, duration: 0.8,
-          scrollTrigger: { trigger: reveal, start: 'top 80%', once: true }
-        })
-      )
-    }
-
-    // Stagger rows
-    const table = document.querySelector('[data-comparison-table]')
-    if (table) {
-      anims.push(
-        gsap.fromTo('[data-comparison-row]', { opacity: 0, x: -20 }, {
-          opacity: 1, x: 0, stagger: 0.08, duration: 0.5,
-          scrollTrigger: { trigger: table, start: 'top 75%', once: true }
-        })
-      )
-    }
-
-    // Value props
-    anims.push(
-      gsap.fromTo('[data-value-prop]', { opacity: 0, y: 40 }, {
-        opacity: 1, y: 0, stagger: 0.15, duration: 0.6,
-        scrollTrigger: { trigger: '[data-value-prop]', start: 'top 85%', once: true }
-      })
-    )
-
-    return () => anims.forEach((a) => a.kill())
-  }, [])
-
   return (
-    <section ref={sectionRef} className="relative py-32 bg-dark-800 overflow-hidden">
-      {/* Aurora gradient */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-lime/10 rounded-full blur-[200px]" />
+    <Section surface="raised">
+      <SectionHeader
+        eyebrow="Why us"
+        title="The difference is specific"
+        lead="Not adjectives. Here is what actually differs, stated plainly enough that you could hold us to it."
+      />
 
-      <div className="relative max-w-7xl mx-auto px-6">
-        {/* Header */}
-        <div className="text-center mb-20" data-reveal>
-          <span className="inline-block px-4 py-1.5 rounded-full border border-lime/30 bg-lime/10 text-lime text-sm font-medium mb-6">
-            The Difference
-          </span>
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
-            Why{' '}
-            <span className="bg-gradient-to-r from-lime to-cyan bg-clip-text text-transparent">SimpleLogicX</span>
-          </h2>
-          <p className="mt-6 text-gray-400 max-w-2xl mx-auto text-lg">
-            We don't just write code — we engineer competitive advantages. Here's how we stack up.
-          </p>
-        </div>
-
-        {/* Comparison table */}
-        <div className="max-w-3xl mx-auto" data-comparison-table>
-          {/* Table headers */}
-          <div className="grid grid-cols-3 items-center gap-4 mb-6 px-8">
-            <div />
-            <p className="text-center text-sm font-semibold text-gray-500 uppercase tracking-wider">Others</p>
-            <p className="text-center text-sm font-semibold text-lime uppercase tracking-wider">SimpleLogicX</p>
-          </div>
-
-          {comparisons.map((item, i) => (
-            <div
-              key={i}
-              data-comparison-row
-              className="grid grid-cols-3 items-center gap-4 py-5 px-8 border-t border-dark-600/50 hover:bg-dark-700/20 transition-colors"
-            >
-              <span className="text-gray-300">{item.feature}</span>
-              <div className="flex justify-center">
-                {item.competitor ? (
-                  <X className="w-5 h-5 text-coral" />
-                ) : (
-                  <X className="w-5 h-5 text-gray-700" />
-                )}
-              </div>
-              <div className="flex justify-center">
-                {item.us ? (
-                  <div className="p-1 rounded-full bg-lime/20">
-                    <Check className="w-4 h-4 text-lime" />
-                  </div>
-                ) : (
-                  <X className="w-5 h-5 text-gray-700" />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Value props */}
-        <div className="mt-24 grid md:grid-cols-3 gap-8">
-          {[
-            { num: '01', title: 'Speed to Market', desc: 'We ship MVPs in weeks, not months. Our agile process delivers working software every sprint.' },
-            { num: '02', title: 'Engineering Rigor', desc: 'Clean architecture, comprehensive testing, and code reviews ensure your product scales without tech debt.' },
-            { num: '03', title: 'Long-term Partnership', desc: 'We stay invested after launch with maintenance, iteration, and strategic guidance as your product evolves.' },
-          ].map((prop, i) => (
-            <div key={i} data-value-prop className="relative p-8 rounded-2xl border border-dark-600/50 bg-dark-700/30">
-              <span className="text-6xl font-black text-dark-500 absolute top-4 right-6">{prop.num}</span>
-              <h3 className="text-xl font-semibold mb-3">{prop.title}</h3>
-              <p className="text-gray-400 leading-relaxed">{prop.desc}</p>
-            </div>
-          ))}
-        </div>
+      {/* Desktop: real table */}
+      <div className="mt-16 hidden overflow-hidden rounded-(--radius-card) border border-line md:block">
+        <table className="w-full border-collapse text-left">
+          <caption className="sr-only">
+            Comparison of a typical agency engagement against a SimpleLogicX engagement
+          </caption>
+          <thead>
+            <tr className="bg-surface">
+              <th scope="col" className="px-6 py-5 font-display text-sm font-semibold text-ink">
+                Dimension
+              </th>
+              <th scope="col" className="px-6 py-5 font-display text-sm font-semibold text-ink-muted">
+                Typical agency
+              </th>
+              <th scope="col" className="px-6 py-5 font-display text-sm font-semibold text-accent">
+                SimpleLogicX
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {comparison.map((row) => (
+              <tr key={row.dimension} className="transition-colors hover:bg-surface">
+                <th scope="row" className="px-6 py-5 align-top font-medium text-ink">
+                  {row.dimension}
+                </th>
+                <td className="px-6 py-5 align-top text-ink-muted">
+                  <span className="flex gap-3">
+                    <X
+                      aria-hidden="true"
+                      className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+                    />
+                    {row.typical}
+                  </span>
+                </td>
+                <td className="px-6 py-5 align-top text-ink-soft">
+                  <span className="flex gap-3">
+                    <Check
+                      aria-hidden="true"
+                      className="mt-0.5 size-4 shrink-0 text-accent"
+                    />
+                    {row.ours}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-    </section>
-  )
+
+      {/* Mobile: stacked cards */}
+      <RevealGroup as="ul" className="mt-12 flex flex-col gap-4 md:hidden">
+        {comparison.map((row) => (
+          <RevealItem
+            as="li"
+            key={row.dimension}
+            className="rounded-(--radius-card) border border-line bg-surface p-6"
+          >
+            <p className="font-display font-semibold text-ink">{row.dimension}</p>
+            <p className="mt-4 flex gap-3 text-sm text-ink-muted">
+              <X
+                aria-hidden="true"
+                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+              />
+              <span>
+                <span className="sr-only">Typical agency: </span>
+                {row.typical}
+              </span>
+            </p>
+            <p className="mt-3 flex gap-3 text-sm text-ink-soft">
+              <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-accent" />
+              <span>
+                <span className="sr-only">SimpleLogicX: </span>
+                {row.ours}
+              </span>
+            </p>
+          </RevealItem>
+        ))}
+      </RevealGroup>
+    </Section>
+  );
 }

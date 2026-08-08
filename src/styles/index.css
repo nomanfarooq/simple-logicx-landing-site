@@ -1,0 +1,172 @@
+/* ==========================================================================
+   SimpleLogicX — stylesheet entry
+   Order matters: fonts and Tailwind first, then our theme layer, then base.
+   ========================================================================== */
+
+@import "./fonts.css";
+@import "tailwindcss";
+@import "./theme.css";
+
+/* ==========================================================================
+   Base layer
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Global overflow guards (§3.2)
+
+   THE CENTRING FIX. Two rules, both deliberate:
+
+   1. `overflow-x: clip` on BOTH html and body. v1 set `overflow-x: hidden` on
+      body only, which relies on overflow propagation and breaks in several
+      browser/scroll-library combinations. `clip` is also correct where
+      `hidden` is not: `hidden` creates a scroll container, which would fight
+      Lenis and break `position: sticky` descendants.
+
+   2. `min-width: 0` on everything. Flex and grid children default to
+      `min-width: auto`, so a single long string or wide child refuses to
+      shrink and pushes the layout wider than the viewport. The document then
+      exceeds the viewport, `margin-inline: auto` centres against that WIDER
+      box, and content visually shifts left with dead space on the right —
+      the exact symptom reported against v1.
+   -------------------------------------------------------------------------- */
+html,
+body {
+  overflow-x: clip;
+}
+
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
+html {
+  /* Lenis owns smooth scrolling (§5.2); native smooth would fight it. */
+  scroll-behavior: auto;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  margin: 0;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01";
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* --------------------------------------------------------------------------
+   Focus (§6 Accessibility)
+   Never `outline: none`. Ring must be visible in both themes.
+   -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Theme switch (§9.7)
+   Applied for one frame while flipping, so every element on the page does not
+   animate its colour at once — which reads as a rendering glitch.
+   -------------------------------------------------------------------------- */
+.theme-transition-off *,
+.theme-transition-off *::before,
+.theme-transition-off *::after {
+  transition: none !important;
+  animation-duration: 0.01ms !important;
+}
+
+/* --------------------------------------------------------------------------
+   Decorative texture (§2.5). aria-hidden at the markup level.
+   -------------------------------------------------------------------------- */
+/* feColorMatrix saturate=0 is load-bearing, not a nicety. Raw feTurbulence
+   generates independent R/G/B channels, i.e. coloured speckle — it scatters
+   random green and magenta pixels across every surface. On a brand we are
+   deliberately pulling AWAY from green, that is the last thing we want.
+   Desaturating gives true monochrome film grain. */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: var(--noise-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* --------------------------------------------------------------------------
+   Scrollbar + selection — token-driven so they follow the theme
+   -------------------------------------------------------------------------- */
+::selection {
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-sunken);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent);
+}
+
+/* --------------------------------------------------------------------------
+   Shared keyframes.
+   Defined globally rather than in a <style> tag inside the component, which
+   would emit a duplicate copy for every instance on the page.
+   -------------------------------------------------------------------------- */
+@keyframes slx-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion (§5.4) — global backstop.
+
+   Per-component guards still apply, but this guarantees that nothing animates
+   for users who opted out even if a component forgets. Critically, elements
+   must END VISIBLE rather than stuck at their initial hidden state.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
