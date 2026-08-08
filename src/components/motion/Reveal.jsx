@@ -34,6 +34,7 @@ export default function Reveal({
   delay = 0,
   duration = 0.6,
   amount = 0.2,
+  disabled = false,
   className,
   ...props
 }) {
@@ -50,8 +51,17 @@ export default function Reveal({
 
   const MotionTag = motion[Tag] ?? motion.div;
 
+  // `disabled` renders content immediately, with no hidden initial state.
+  //
+  // Needed wherever a list re-renders in response to a user action rather than
+  // to scrolling — a filter, a sort, a tab. Re-running an entrance animation
+  // there means the results the user just asked for start invisible, and if
+  // they sit below the fold the scroll trigger never fires, so the 1200ms
+  // failsafe becomes the primary path. Measured on /work before this existed:
+  // the list stayed blank for a full 1.2s after every filter click.
+  //
   // Reduced motion: no animation, no initial hidden state, nothing to go wrong.
-  if (reduceMotion) {
+  if (reduceMotion || disabled) {
     return (
       <Tag className={className} {...props}>
         {children}

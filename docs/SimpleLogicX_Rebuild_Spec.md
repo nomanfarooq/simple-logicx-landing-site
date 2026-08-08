@@ -674,7 +674,17 @@ Pages
    rather than listed on the service, so the two data sets cannot contradict each other.
    Two case studies added (Vantage Retail, Halden Energy) because mobile and web had no
    related work and `/work` was thin at three.
-7. Work index + case studies
+7. ~~Work index + case studies~~ **DONE — 5/5 case studies pass (554–629 words each,
+   `Article` + `BreadcrumbList` schema, 4-stage architecture diagram).** Composition per
+   §4.4: hero with qualifying detail, challenge, four explained decisions, architecture
+   diagram, results, testimonial, next-case (wraps, so the last study is not a dead end),
+   CTA. Work index filters by service with counts and a live-region result announcement.
+
+   **`ArchitectureDiagram` is HTML/CSS grid, not SVG** — deliberate. Labels stay real
+   text (selectable, translatable, resizable, legible at 390px), the layout reflows from
+   four columns to a stack, and the markup is already an ordered list of stages, so no
+   parallel text description is needed. Text inside an SVG `viewBox` scales with the
+   drawing and becomes unreadable on a phone.
 8. About, Process, Pricing, Contact
 9. Insights, Legal, 404
 10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass

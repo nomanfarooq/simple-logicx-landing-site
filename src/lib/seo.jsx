@@ -98,6 +98,24 @@ export function serviceJsonLd(service) {
   };
 }
 
+/**
+ * Case study schema. Article rather than CreativeWork so the headline,
+ * publisher and description map onto fields search engines actually use.
+ */
+export function caseStudyJsonLd(study) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: study.title,
+    description: study.summary,
+    url: `${BASE_URL}/work/${study.slug}`,
+    author: { "@type": "Organization", name: SITE, url: BASE_URL },
+    publisher: { "@type": "Organization", name: SITE, url: BASE_URL },
+    about: study.services.map((s) => ({ "@type": "Thing", name: s })),
+    datePublished: `${study.year}-01-01`,
+  };
+}
+
 export function breadcrumbJsonLd(trail) {
   return {
     "@context": "https://schema.org",
