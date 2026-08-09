@@ -48,7 +48,7 @@ export default function FeaturedWork() {
                       <dd className="mt-1">
                         <Counter
                           value={m.value}
-                          className="grad-primary text-grad font-display text-xl font-bold"
+                          className="grad-ink text-grad font-display text-xl font-bold"
                         />
                       </dd>
                     </div>

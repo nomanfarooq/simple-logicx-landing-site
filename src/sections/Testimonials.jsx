@@ -29,7 +29,7 @@ export default function Testimonials() {
                   <Star
                     key={i}
                     aria-hidden="true"
-                    className="size-4 fill-[color:var(--color-gold)] text-[color:var(--color-gold)]"
+                    className="size-4 fill-premium text-premium"
                   />
                 ))}
               </div>
@@ -41,7 +41,7 @@ export default function Testimonials() {
               <figcaption className="mt-6 flex items-center gap-3 border-t border-line pt-5">
                 <span
                   aria-hidden="true"
-                  className="grad-primary grid size-10 shrink-0 place-items-center rounded-full font-mono text-xs font-bold text-white"
+                  className="grad-cta grid size-10 shrink-0 place-items-center rounded-full font-mono text-xs font-bold text-accent-ink"
                 >
                   {t.initials}
                 </span>

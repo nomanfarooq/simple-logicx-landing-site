@@ -53,7 +53,7 @@ export default function WhyChooseUs() {
                   <span className="flex gap-3">
                     <X
                       aria-hidden="true"
-                      className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+                      className="mt-0.5 size-4 shrink-0 text-danger"
                     />
                     {row.typical}
                   </span>
@@ -85,7 +85,7 @@ export default function WhyChooseUs() {
             <p className="mt-4 flex gap-3 text-sm text-ink-muted">
               <X
                 aria-hidden="true"
-                className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+                className="mt-0.5 size-4 shrink-0 text-danger"
               />
               <span>
                 <span className="sr-only">Typical agency: </span>

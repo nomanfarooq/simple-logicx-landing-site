@@ -26,6 +26,10 @@ const PREVIEW_SUITES = [
   "verify-pages.mjs",
   "verify-insights.mjs",
   "verify-interactions.mjs",
+  "verify-contrast.mjs",
+  "verify-a11y.mjs",
+  "verify-keyboard.mjs",
+  "verify-reduced-motion.mjs",
   "verify-nogreen.mjs",
   "sanity-green.mjs",
 ];

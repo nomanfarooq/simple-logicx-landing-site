@@ -16,7 +16,7 @@ export default function ErrorBoundary() {
   return (
     <Section size="narrow" className="min-h-[70vh] grid place-items-center">
       <div className="text-center">
-        <p className="grad-primary text-grad font-display text-6xl font-bold">
+        <p className="grad-ink text-grad font-display text-6xl font-bold">
           {isRouteErrorResponse(error) ? error.status : "Error"}
         </p>
         <h1 className="mt-6 text-h2 text-ink">

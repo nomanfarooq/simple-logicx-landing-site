@@ -248,7 +248,7 @@ function EnquiryForm() {
             className="block text-sm font-medium text-ink"
           >
             What are you trying to build?
-            <span className="text-[color:var(--color-coral)]"> *</span>
+            <span className="text-danger"> *</span>
           </label>
           <textarea
             id={`${id}-message`}
@@ -293,7 +293,7 @@ function Field({ id, name, label, type = "text", required, autoComplete }) {
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-ink">
         {label}
-        {required && <span className="text-[color:var(--color-coral)]"> *</span>}
+        {required && <span className="text-danger"> *</span>}
       </label>
       <input
         id={id}
@@ -317,7 +317,7 @@ function Select({ id, name, label, options, required, value, onChange }) {
     <div>
       <label htmlFor={id} className="block text-sm font-medium text-ink">
         {label}
-        {required && <span className="text-[color:var(--color-coral)]"> *</span>}
+        {required && <span className="text-danger"> *</span>}
       </label>
       <select
         id={id}

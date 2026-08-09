@@ -10,17 +10,26 @@ const BASE = process.env.URL || 'http://localhost:4173'
  * made v1 read green.
  */
 
-const GRADIENTS = ['grad-primary', 'grad-primary-wide', 'grad-warm', 'grad-alert']
+// grad-ink and grad-cta were added in step 10 to fix a measured contrast
+// failure (see theme.css). They are theme-aware, so both themes are sampled —
+// four ramps here rather than two, since light and dark resolve differently.
+const GRADIENTS = [
+  'grad-primary', 'grad-primary-wide', 'grad-warm', 'grad-alert',
+  'grad-ink', 'grad-cta',
+]
 const GREEN_MIN = 75   // degrees
 const GREEN_MAX = 165
 const SAT_FLOOR = 0.18 // below this it is effectively grey, not a green cast
 
 const browser = await chromium.launch()
-const ctx = await browser.newContext({ viewport: { width: 1000, height: 900 } })
+const results = []
+
+for (const theme of ['light', 'dark']) {
+const ctx = await browser.newContext({ viewport: { width: 1000, height: 900 }, colorScheme: theme })
 const page = await ctx.newPage()
 await page.goto(BASE + '/', { waitUntil: 'networkidle' })
 
-const results = await page.evaluate(
+const themeResults = await page.evaluate(
   ({ GRADIENTS, GREEN_MIN, GREEN_MAX, SAT_FLOOR }) => {
     const host = document.createElement('div')
     host.style.cssText = 'position:fixed;left:0;top:0;z-index:99999'
@@ -80,16 +89,20 @@ const results = await page.evaluate(
   },
   { GRADIENTS, GREEN_MIN, GREEN_MAX, SAT_FLOOR },
 )
+results.push(...themeResults.map((r) => ({ ...r, theme })))
+await ctx.close()
+}
 
 let fails = 0
 for (const r of results) {
-  if (r.error) { fails++; console.log(`ERROR ${r.cls}: ${r.error}`); continue }
+  const name = `${r.theme}/${r.cls}`
+  if (r.error) { fails++; console.log(`ERROR ${name}: ${r.error}`); continue }
   if (r.violations.length === 0) {
-    console.log(`PASS  ${r.cls.padEnd(20)} 0 green pixels of ${r.samples} samples`)
+    console.log(`PASS  ${name.padEnd(26)} 0 green pixels of ${r.samples} samples`)
   } else {
     fails++
     const w = r.violations
-    console.log(`FAIL  ${r.cls.padEnd(20)} ${w.length}/${r.samples} green samples`)
+    console.log(`FAIL  ${name.padEnd(26)} ${w.length}/${r.samples} green samples`)
     console.log(`        worst: hue ${w[Math.floor(w.length / 2)].hue}° sat ${w[Math.floor(w.length / 2)].sat} rgb(${w[Math.floor(w.length / 2)].rgb}) at x=${w[Math.floor(w.length / 2)].x}`)
   }
 }

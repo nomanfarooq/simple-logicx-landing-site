@@ -10,9 +10,14 @@ import { cn } from "../../lib/cn";
  */
 
 const VARIANTS = {
-  // Primary CTA. grad-primary only — never a cyan->lime ramp (§2.3).
+  // Primary CTA. grad-cta, not grad-primary: the label sits ON the ramp, and
+  // white on grad-primary's cyan end measures 1.95:1 against a 4.5:1
+  // requirement — in BOTH themes, since that gradient is theme-invariant.
+  // grad-cta is the same brand axis, cut short where it stops being legible,
+  // and it pairs with --accent-contrast rather than a hardcoded white. See the
+  // measurements in theme.css.
   primary:
-    "grad-primary text-white shadow-sm hover:brightness-110 active:brightness-95",
+    "grad-cta text-accent-ink shadow-sm hover:brightness-110 active:brightness-95",
   secondary:
     "border border-line-strong bg-surface text-ink hover:bg-surface-hover hover:border-accent/50",
   ghost: "text-ink-soft hover:text-ink hover:bg-surface",

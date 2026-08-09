@@ -243,7 +243,7 @@ function Estimator() {
                 step={1}
                 value={months}
                 onChange={(e) => setMonths(Number(e.target.value))}
-                className="mt-3 w-full accent-accent"
+                className="mt-3 h-6 w-full accent-accent"
               />
               <div className="mt-1 flex justify-between font-mono text-xs text-ink-muted">
                 <span>{MONTH_MIN} min</span>

@@ -125,7 +125,7 @@ export default function Article() {
               </div>
               <Link
                 to="/insights"
-                className="group inline-flex items-center gap-2 text-sm font-medium text-accent"
+                className="group inline-flex min-h-6 items-center gap-2 text-sm font-medium text-accent"
               >
                 <ArrowLeft
                   aria-hidden="true"

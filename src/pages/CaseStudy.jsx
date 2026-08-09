@@ -53,7 +53,7 @@ export default function CaseStudy() {
         <Reveal>
           <Link
             to="/work"
-            className="group inline-flex items-center gap-2 text-sm font-medium text-accent"
+            className="group inline-flex min-h-6 items-center gap-2 text-sm font-medium text-accent"
           >
             <ArrowLeft
               aria-hidden="true"
@@ -111,7 +111,7 @@ export default function CaseStudy() {
               <dd>
                 <Counter
                   value={m.value}
-                  className="grad-primary text-grad font-display text-4xl font-bold"
+                  className="grad-ink text-grad font-display text-4xl font-bold"
                 />
               </dd>
               <dt className="mt-2 text-sm text-ink-muted">{m.label}</dt>
@@ -149,7 +149,7 @@ export default function CaseStudy() {
               key={step.title}
               className="grid gap-5 rounded-(--radius-card) border border-line bg-surface p-7 md:grid-cols-[auto_1fr] md:gap-8"
             >
-              <span className="grad-primary text-grad font-display text-3xl font-bold">
+              <span className="grad-ink text-grad font-display text-3xl font-bold">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
@@ -220,7 +220,7 @@ export default function CaseStudy() {
             <figcaption className="mt-7 flex items-center gap-4 border-t border-line pt-6">
               <span
                 aria-hidden="true"
-                className="grad-primary grid size-12 shrink-0 place-items-center rounded-full font-mono text-sm font-bold text-white"
+                className="grad-cta grid size-12 shrink-0 place-items-center rounded-full font-mono text-sm font-bold text-accent-ink"
               >
                 {study.testimonial.initials}
               </span>

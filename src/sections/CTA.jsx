@@ -11,7 +11,7 @@ export default function CTA() {
       <Reveal className="mx-auto max-w-2xl text-center">
         <h2 className="text-h2 text-ink">
           Tell us what you are{" "}
-          <span className="grad-primary text-grad">building</span>
+          <span className="grad-ink text-grad">building</span>
         </h2>
         <p className="mt-6 text-lg text-ink-soft">
           Every enquiry is read by an engineer, not a sales desk. We reply within

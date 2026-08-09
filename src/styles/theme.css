@@ -55,10 +55,22 @@
   --border: light-dark(rgb(10 90 126 / 0.14), rgb(255 255 255 / 0.1));
   --border-strong: light-dark(rgb(10 90 126 / 0.26), rgb(255 255 255 / 0.18));
 
-  /* Text */
+  /* Text.
+
+     The muted tier is 0.65 in light, not the 0.52 it started at. Measured:
+     0.52 composited over #FFFFFF is 3.47:1 and over the raised/sunken surfaces
+     3.32-3.42:1 — all of it body-sized copy that needs 4.5:1. It failed on
+     ~1,600 nodes, the largest single defect step 10 found. 0.65 measures
+     4.87:1 against the darkest light surface. Dark was already 4.66:1 and is
+     unchanged.
+
+     These tiers are deliberately closer together in light mode than they look
+     in dark. That is forced, not an oversight: 4.5:1 on white caps how light
+     a body-text token can be, so `soft` and `muted` necessarily converge.
+     Hierarchy below that point has to come from size and weight. */
   --text-primary: light-dark(#06222e, #f2f7f9);
   --text-secondary: light-dark(rgb(6 34 46 / 0.72), rgb(242 247 249 / 0.72));
-  --text-muted: light-dark(rgb(6 34 46 / 0.52), rgb(242 247 249 / 0.48));
+  --text-muted: light-dark(rgb(6 34 46 / 0.65), rgb(242 247 249 / 0.48));
 
   /* Accent.
      NOTE (§2.2): cyan #35CCD9 on white is ~1.9:1 and fails AA. Light mode
@@ -67,6 +79,28 @@
   --accent: light-dark(#0a5a7e, #35ccd9);
   --accent-contrast: light-dark(#ffffff, #04141b);
   --glow: light-dark(rgb(10 90 126 / 0.14), rgb(53 204 217 / 0.22));
+
+  /* The far end of the brand ramp — whichever pole `--accent` is NOT.
+     See the grad-ink / grad-cta note at the bottom of this file. */
+  --accent-ramp-ink: light-dark(#1b88a3, #249eb4);
+  --accent-ramp-cta: light-dark(#157795, #2aafc2);
+
+  /* Status colours.
+     Semantic aliases for the Layer 1 constants, so components never reach for
+     a brand hex directly (§10, Colour).
+
+     Light mode darkens all three, for the same reason `--accent` does. The
+     brand constants were picked against a dark canvas and are washed out on
+     white — measured on #FFFFFF:
+       coral #F53F61  3.64:1   fails as the required-field marker (text)
+       lime  #8FB641  2.35:1   fails 1.4.11 for the status dot   (non-text)
+       gold  #E2C550  1.70:1   rating stars nearly invisible     (non-text)
+     The replacements are the same hue, darkened until they measure: danger
+     4.77:1 (text), success 3.53:1 and premium 3.23:1 (both non-text, 3:1).
+     Dark mode keeps the brand values, which already pass on #050505. */
+  --danger: light-dark(#d92b4e, #f53f61);
+  --success: light-dark(#6f9427, #8fb641);
+  --premium: light-dark(#ad8b2a, #e2c550);
 
   /* Decorative intensities — orbs and noise read differently on white (§2.5).
      Noise is deliberately low: the texture should be felt, not seen. Anything
@@ -131,6 +165,10 @@
 
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-contrast);
+
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-premium: var(--premium);
 }
 
 /* --------------------------------------------------------------------------
@@ -249,7 +287,57 @@
    or grey (going via the complementary axis). There is no third path in sRGB.
    Use grad-primary for headlines; it stays vivid across its whole length. */
 
-/* Paint any of the above onto text. Compose: `grad-primary text-grad` */
+/* --------------------------------------------------------------------------
+   Text-bearing gradients (added in step 10, from measurement)
+
+   `grad-primary` spans #0A5A7E (relative luminance 0.089) to #35CCD9 (0.489).
+   That is most of the available luminance range, and it is why NO single text
+   colour works on it or as it:
+
+     white on the cyan end .................. 1.95:1   (needs 4.5 — button text)
+     #04141B on the deep-blue end ........... 2.48:1   (needs 4.5)
+     cyan glyphs on the light canvas ........ 1.95:1   (needs 3 — display type)
+     deep-blue glyphs on the dark canvas .... 2.69:1   (needs 3)
+
+   Both themes failed, at opposite ends. This is the same shape of problem as
+   the green one in §2.3: a property of the colours, not a matter of taste, and
+   it does not have a fix that keeps the full ramp.
+
+   The fix is that each theme uses only the half of the ramp that contrasts
+   with its own canvas — exactly the logic `--accent` already applies. Both
+   utilities start at `--accent` and travel toward the opposite pole, stopping
+   where the measurement stops being comfortable:
+
+     grad-ink   display type painted through the glyphs. Needs 3:1 (it is only
+                ever used on large text — verify-contrast enforces that).
+                Measures 7.56:1 / 4.12:1 light, 10.47:1 / 6.46:1 dark.
+     grad-cta   a filled surface with `--accent-contrast` on top. Needs 4.5:1,
+                so it travels less far. Measures 5.15:1 light, 7.15:1 dark.
+
+   `grad-primary` is unchanged and remains the brand gradient — but it is now
+   decoration only: orbs, rules, the scroll progress bar, the logo mark. Never
+   put text on it or paint text with it.
+
+   Green check: the new stops sit at hue 187-194°, well clear of the 75-165°
+   window verify-nogreen fails on. They are in that suite's list too.
+   -------------------------------------------------------------------------- */
+@utility grad-ink {
+  background-image: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-ramp-ink) 100%
+  );
+}
+
+@utility grad-cta {
+  background-image: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-ramp-cta) 100%
+  );
+}
+
+/* Paint any of the above onto text. Compose: `grad-ink text-grad` */
 @utility text-grad {
   background-clip: text;
   -webkit-background-clip: text;

@@ -55,7 +55,7 @@ export default function Footer() {
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="grad-primary grid size-11 shrink-0 place-items-center rounded-(--radius-pill) text-white transition-[filter] hover:brightness-110"
+                  className="grad-cta grid size-11 shrink-0 place-items-center rounded-(--radius-pill) text-accent-ink transition-[filter] hover:brightness-110"
                 >
                   <ArrowRight aria-hidden="true" className="size-4" />
                 </button>
@@ -123,7 +123,7 @@ export default function Footer() {
             {/* One of the two permitted lime elements on this page (§2.3). */}
             <span
               aria-hidden="true"
-              className="size-2 rounded-full bg-[color:var(--color-lime)]"
+              className="size-2 rounded-full bg-success"
             />
             All systems operational
           </p>

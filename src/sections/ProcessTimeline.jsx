@@ -21,6 +21,11 @@ export default function ProcessTimeline({ showHeader = true }) {
   const line = useRef(null);
   const reduceMotion = usePrefersReducedMotion();
 
+  // Phase heading level follows the section header — see the same note in
+  // ServicesGrid. On /process the header is suppressed, so a fixed h3 would
+  // skip a level down from the page h1.
+  const PhaseHeading = showHeader ? "h3" : "h2";
+
   useGSAP(
     () => {
       if (reduceMotion || !line.current) return;
@@ -79,9 +84,9 @@ export default function ProcessTimeline({ showHeader = true }) {
 
                   <div className="rounded-(--radius-card) border border-line bg-surface p-7">
                     <div className="flex flex-wrap items-baseline justify-between gap-3">
-                      <h3 className="font-display text-xl font-semibold text-ink">
+                      <PhaseHeading className="font-display text-xl font-semibold text-ink">
                         {step.title}
-                      </h3>
+                      </PhaseHeading>
                       <span className="font-mono text-xs text-ink-muted">
                         {step.duration}
                       </span>

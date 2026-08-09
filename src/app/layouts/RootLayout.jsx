@@ -119,7 +119,15 @@ export default function RootLayout() {
 
       <Navbar />
 
-      <main id="main" ref={mainRef} className="flex-1">
+      {/* tabIndex={-1} is what makes the skip link work outside Chromium.
+          Chrome moves the sequential focus navigation starting point to the
+          fragment target even when it is not focusable, so tabbing continues
+          from <main> and the link appears to work. Firefox and Safari do not,
+          and there the skip link silently does nothing — focus stays at the
+          top and the next Tab goes back into the navbar, which is the whole
+          thing a skip link exists to avoid. Making the target focusable is
+          the fix that behaves the same everywhere. */}
+      <main id="main" ref={mainRef} tabIndex={-1} className="flex-1 outline-none">
         {/* Stable focus target for route changes. Outside AnimatePresence so
             it is never unmounted — see the focus effect above. */}
         <div

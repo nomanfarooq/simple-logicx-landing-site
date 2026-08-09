@@ -94,19 +94,47 @@ export function useScrollTo() {
 
   return useCallback(
     (target, { offset = -80, immediate = false } = {}) => {
+      // Resolve an element target to an absolute document position OURSELVES
+      // rather than handing the element to Lenis.
+      //
+      // Lenis resolves an element by walking offsetTop up the offsetParent
+      // chain. That chain is only stable while nothing between the element and
+      // the document is transformed — and on this site things frequently are:
+      // `Reveal` applies a transform for the duration of its entry animation,
+      // and a transformed element becomes the offsetParent of everything
+      // inside it. Click a contents link while any ancestor reveal is still
+      // in flight and offsetTop is suddenly measured from that ancestor
+      // instead of the page, so the scroll lands hundreds of pixels away.
+      //
+      // Measured on /insights/evaluating-rag-honestly, same link, same start
+      // position: the heading settled 668px above the viewport top one way and
+      // 192px below it the other, against an intended 80px. It looked like
+      // "smooth scroll is a bit off" rather than a bug, which is how it
+      // survived to step 10 — verify-insights only asserted that the page
+      // moved at all.
+      //
+      // getBoundingClientRect is transform-aware and viewport-relative, so
+      // adding scrollY gives the true document position regardless of what is
+      // mid-animation. It also means both branches below compute the target
+      // identically instead of relying on two different resolvers agreeing.
+      const el =
+        typeof target === "string" ? document.querySelector(target) : target;
+
+      let top;
+      if (typeof target === "number") {
+        top = target;
+      } else if (el) {
+        top = el.getBoundingClientRect().top + window.scrollY + offset;
+      } else {
+        return;
+      }
+
       if (lenis) {
-        lenis.scrollTo(target, { offset, immediate });
+        lenis.scrollTo(top, { immediate });
         return;
       }
       // Reduced motion, or Lenis not mounted yet.
-      const el =
-        typeof target === "string" ? document.querySelector(target) : target;
-      if (typeof target === "number") {
-        window.scrollTo({ top: target, behavior: "instant" });
-      } else if (el) {
-        const top = el.getBoundingClientRect().top + window.scrollY + offset;
-        window.scrollTo({ top, behavior: immediate ? "instant" : "smooth" });
-      }
+      window.scrollTo({ top, behavior: immediate ? "instant" : "smooth" });
     },
     [lenis],
   );

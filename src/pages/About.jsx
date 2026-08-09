@@ -54,7 +54,7 @@ export default function About() {
               <dd>
                 <Counter
                   value={s.value}
-                  className="grad-primary text-grad font-display text-3xl font-bold"
+                  className="grad-ink text-grad font-display text-3xl font-bold"
                 />
               </dd>
               <dt className="mt-1 max-w-[15ch] text-sm text-ink-muted">{s.label}</dt>

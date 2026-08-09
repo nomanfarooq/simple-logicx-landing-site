@@ -18,7 +18,7 @@ import { cn } from "../lib/cn";
  * an accident.
  */
 
-function ServiceCard({ service, wide }) {
+function ServiceCard({ service, wide, headingLevel: Heading }) {
   const Icon = getIcon(service.icon);
 
   return (
@@ -34,9 +34,9 @@ function ServiceCard({ service, wide }) {
       </span>
 
       <div className={cn("min-w-0", wide ? "flex-1" : "mt-5 flex flex-1 flex-col")}>
-        <h3 className="font-display text-xl font-semibold text-ink">
+        <Heading className="font-display text-xl font-semibold text-ink">
           {service.title}
-        </h3>
+        </Heading>
         <p className={cn("text-ink-muted", wide ? "mt-2" : "mt-3 flex-1")}>
           {service.tagline}
         </p>
@@ -62,6 +62,13 @@ export default function ServicesGrid({ showHeader = true, showCta = true }) {
   const lastIndex = services.length - 1;
   // Only worth spanning when the final row would otherwise be short.
   const orphaned = services.length % 3 === 1;
+
+  // Card heading level follows the section header rather than being fixed.
+  // With the header, the cards sit under its h2 and are h3. On /services the
+  // header is suppressed because the page masthead already says the same
+  // thing — so a hardcoded h3 would jump straight from the h1 and break the
+  // document outline. Deriving it means the two cannot drift apart.
+  const headingLevel = showHeader ? "h3" : "h2";
 
   return (
     <Section id="services">
@@ -90,7 +97,7 @@ export default function ServicesGrid({ showHeader = true, showCta = true }) {
               key={s.slug}
               className={cn(wide && "md:col-span-2 lg:col-span-3")}
             >
-              <ServiceCard service={s} wide={wide} />
+              <ServiceCard service={s} wide={wide} headingLevel={headingLevel} />
             </RevealItem>
           );
         })}

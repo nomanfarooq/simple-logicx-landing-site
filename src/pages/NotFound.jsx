@@ -41,7 +41,7 @@ export default function NotFound() {
         }
       >
         <div className="w-full text-center">
-          <p className="grad-primary text-grad font-display text-7xl font-bold">404</p>
+          <p className="grad-ink text-grad font-display text-7xl font-bold">404</p>
           <h1 className="mt-6 text-h2 text-ink">This page does not exist</h1>
           <p className="mx-auto mt-5 max-w-md text-ink-soft">
             The link may be out of date, or the page may have moved. Search for

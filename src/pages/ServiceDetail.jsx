@@ -84,7 +84,7 @@ export default function ServiceDetail() {
                   <dd>
                     <Counter
                       value={o.value}
-                      className="grad-primary text-grad font-display text-2xl font-bold lg:text-3xl"
+                      className="grad-ink text-grad font-display text-2xl font-bold lg:text-3xl"
                     />
                   </dd>
                   <dt className="mt-1 text-sm text-ink-muted">{o.label}</dt>

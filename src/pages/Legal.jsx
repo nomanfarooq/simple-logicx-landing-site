@@ -113,11 +113,11 @@ export default function Legal({ doc }) {
             {meta.notice && (
               <p
                 role="note"
-                className="flex gap-3 rounded-(--radius-card) border border-[color:var(--color-coral)]/40 bg-surface p-5 text-sm text-ink-soft"
+                className="flex gap-3 rounded-(--radius-card) border border-danger/40 bg-surface p-5 text-sm text-ink-soft"
               >
                 <AlertTriangle
                   aria-hidden="true"
-                  className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+                  className="mt-0.5 size-4 shrink-0 text-danger"
                 />
                 <span>
                   <span className="font-medium text-ink">Draft. </span>

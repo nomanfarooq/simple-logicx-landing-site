@@ -38,7 +38,7 @@ export default function ProcessMini({ surface = "raised" }) {
       <div className="mt-10 text-center">
         <Link
           to="/process"
-          className="group inline-flex items-center gap-2 text-sm font-medium text-accent"
+          className="group inline-flex min-h-6 items-center gap-2 text-sm font-medium text-accent"
         >
           Read the full process
           <ArrowRight

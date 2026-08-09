@@ -58,7 +58,7 @@ export default function Home() {
             {/* Permitted lime instance #1 of 2 on this page (§2.3). */}
             <span
               aria-hidden="true"
-              className="size-2 rounded-full bg-[color:var(--color-lime)]"
+              className="size-2 rounded-full bg-success"
             />
             Taking on new engagements for Q3
           </motion.span>
@@ -73,7 +73,7 @@ export default function Home() {
             {/* grad-primary, not a multi-hue spectrum: cyan cannot reach the
                 warm end of the palette without passing through green or grey.
                 See the note in styles/theme.css for the measurements. */}
-            <span className="grad-primary text-grad block">holds up</span>
+            <span className="grad-ink text-grad block">holds up</span>
           </motion.h1>
 
           <motion.p
@@ -120,7 +120,7 @@ export default function Home() {
               <dd>
                 <Counter
                   value={s.value}
-                  className="grad-primary text-grad block font-display text-3xl font-bold sm:text-4xl"
+                  className="grad-ink text-grad block font-display text-3xl font-bold sm:text-4xl"
                 />
                 <span className="mt-2 block text-sm text-ink-muted">{s.label}</span>
               </dd>

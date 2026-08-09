@@ -106,7 +106,7 @@ export default function Process() {
                   <li className="flex gap-3 text-ink-muted">
                     <X
                       aria-hidden="true"
-                      className="mt-0.5 size-4 shrink-0 text-[color:var(--color-coral)]"
+                      className="mt-0.5 size-4 shrink-0 text-danger"
                     />
                     <span>
                       <span className="sr-only">Not for: </span>
