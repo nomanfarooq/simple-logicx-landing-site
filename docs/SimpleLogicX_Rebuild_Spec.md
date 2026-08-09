@@ -710,7 +710,43 @@ Pages
    was false, the dev-only `window.__SLX` handle in `lib/gsap.js` was stripped, and
    `verify-motion` could not pass under `npm run verify` at all — including at step 4,
    where it was recorded as passing. `run.mjs` now resets `NODE_ENV` first.
-9. Insights, Legal, 404
+9. ~~Insights, Legal, 404~~ **DONE — 12/12 in the new `verify-insights` suite, and the
+   `/legal/*` and `/404` blocks added to `verify-pages` all pass.** Three long-form
+   articles (1188–1505 words) with a contents rail, byline, code samples and read-next
+   wrap-around; both legal documents written in full; 404 gained the search §4.1 asks for.
+
+   **Article bodies are structured blocks, not HTML strings or MDX.** Every block renders
+   through `components/ui/ArticleBody`, which owns the typography — so an article cannot
+   introduce a heading level or a colour the design system does not have, and there is no
+   `dangerouslySetInnerHTML` anywhere in the app. MDX would have meant a compiler, a plugin
+   chain and a second content pipeline for three articles. Legal copy reuses the same
+   renderer for the same reason.
+
+   **Derived, never authored:** `readingTime` is computed from the body word count, the
+   contents list is generated from the body's `h2` blocks, and the byline is resolved
+   against `content/team.js` — an unknown author throws at module load rather than
+   rendering "undefined". `verify-insights` checks each against its source rather than
+   against a literal.
+
+   **In-page anchors go through `useScrollTo`.** A native hash jump sets `scrollTop`
+   directly and Lenis animates straight back to its own target, so the contents links stay
+   real anchors with a handler that scrolls properly. The suite asserts the page actually
+   moves.
+
+   **The legal pages carry a visible draft notice**, rendered from `content/legal.js`
+   rather than hardcoded, so removing it is a deliberate edit at the point counsel signs
+   the copy off. The privacy policy describes what the site actually does — no analytics,
+   no cookies, self-hosted fonts, theme in localStorage — and `verify-pages` executes
+   those four claims against the running page rather than trusting the prose.
+
+   **404 search runs over a derived site index** (`content/siteIndex.js`) built from
+   services, case studies, insights and legal docs, so it cannot go stale as content is
+   added. Substring-ranked, not fuzzy: a fuzzy matcher over ~20 entries returns something
+   for every query, which on a 404 page reads as guessing.
+
+   **Still outstanding from §4.3: the ⌘K CommandPalette was never built** (it belonged to
+   step 3). `content/siteIndex.js` and `searchSite()` are exactly the data and matcher it
+   needs, so it is now a UI-only job.
 10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass
 
 ---

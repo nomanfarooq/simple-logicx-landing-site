@@ -8,8 +8,11 @@ import { services } from "./services";
  * form that routes work to it.
  */
 
+// Every address the site publishes lives here, so the legal pages, the contact
+// panel and the footer cannot print different ones.
 export const contactEmail = "hello@simplelogicx.com";
 export const careersEmail = "careers@simplelogicx.com";
+export const privacyEmail = "privacy@simplelogicx.com";
 
 export const enquiryTypes = [
   ...services.map((s) => ({ value: s.slug, label: s.title })),

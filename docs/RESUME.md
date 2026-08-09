@@ -1,6 +1,6 @@
 # Resume log — SimpleLogicX v2 rebuild
 
-**Paused after step 8 of 10.** Branch `rebuild/v2-foundation`, **not pushed**.
+**Paused after step 9 of 10.** Branch `rebuild/v2-foundation`, **not pushed**.
 
 Read this first, then `docs/SimpleLogicX_Rebuild_Spec.md` — the spec is the authority on
 what to build and why; this file is only the bookmark.
@@ -10,9 +10,10 @@ what to build and why; this file is only the bookmark.
 ## Where things stand
 
 ```
+(step 9)  Write insights, legal and 404 search                     (this commit)
+3f5450a   Record the step 8 commit hash in the resume log
 ce58769   Build About, Process, Pricing and Contact                (step 8)
 a4f42ea   Add full case study narratives and filterable work index (step 7)
-bcd5077   Update spec: mark step 6 complete
 72509b2   Add service detail pages and two case studies            (step 6)
 feaca8b   Rebuild site foundation: fix centring and palette, …     (steps 1–5)
 5294b6b   initial commit landing site                              (v1, deleted in step 5)
@@ -22,33 +23,50 @@ feaca8b   Rebuild site foundation: fix centring and palette, …     (steps 1–
 |---|---|
 | 1. Tokens, theme, fonts, no-flash, primitives | done |
 | 2. Centring verified at 7 breakpoints | done |
-| 3. Router, layouts, navbar, footer, theme toggle | done |
+| 3. Router, layouts, navbar, footer, theme toggle | done (except CommandPalette — see below) |
 | 4. Motion infrastructure | done |
 | 5. Home, section by section | done |
 | 6. Services index + 7 detail pages | done |
 | 7. Work index + 5 case studies | done |
 | 8. About, Process, Pricing, Contact | done |
-| **9. Insights, Legal, 404** | **next** |
-| 10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass | not started |
+| 9. Insights, Legal, 404 | done |
+| **10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass** | **next** |
 
-All 8 suites green: routes, services, work, **pages (new)**, interactions, no-green,
+All 9 suites green: routes, services, work, pages, insights, interactions, no-green,
 sanity-green, motion.
+
+**Every page on the site now has real content. No placeholder copy remains anywhere in
+`src/`** — that was the precondition for step 10.
 
 ---
 
 ## Pick up here
 
-**Step 9 — Insights, Legal, 404.**
+**Step 10 — accessibility audit, Lighthouse, cross-browser, reduced-motion pass.**
 
-- **Insights** is an index over `src/content/insights.js` with no article bodies. `Article.jsx`
-  still carries a literal "authored in step 9" sentence in its copy, and the header comment
-  in `insights.js` says the same. Both must be gone before step 10.
-- **Legal** (`/legal/privacy`, `/legal/terms`) and **404** are the other two.
-  §4.1 wants the 404 branded, with search and suggested routes.
-- Article bodies are the real work here. The case studies in `caseStudies.js` are the
-  model for how long-form content is structured and how specific the writing has to be.
+The suites already cover a lot of this incidentally (focus handoff, live regions, labelled
+controls, reduced motion, zero overflow at four widths in both themes). What step 10 adds
+is the parts a DOM assertion cannot reach:
 
-Grep for `step 9` in `src/` — the placeholder pages say which step fills them in.
+- **Contrast.** Nothing has measured `text-ink-muted` on `bg-surface` in either theme. That
+  is the most likely real failure on the site.
+- **Lighthouse**, on the production build, per route. The bundle is the known problem —
+  see below.
+- **Cross-browser.** Everything so far has run in Chromium on Windows only. Safari is the
+  risk: `light-dark()`, `@layer` ordering and the Lenis/GSAP ticker wiring are all places
+  where it differs.
+- **Full keyboard pass** by hand, including the mega-menu, the mobile dialog, the pricing
+  estimator slider and the 404 search.
+- **Screen reader pass** on at least one of the long articles, which are the newest and
+  least exercised markup on the site.
+
+Three decisions are waiting and each needs approval, because each is a deletion:
+
+- `src/dev/LayoutProbe.jsx` — unmounted since step 2, meant to be deleted at cutover.
+- Four `site-*.png` screenshots sitting untracked in the repo root. Not committed by any
+  step; decide whether they belong in the repo or in `.gitignore`.
+- The `notice` field in `content/legal.js`, which is what removes the draft banner. That
+  one is counsel's call, not an engineering decision.
 
 ---
 
@@ -56,7 +74,8 @@ Grep for `step 9` in `src/` — the placeholder pages say which step fills them 
 
 **Never write an unlayered global reset.** `* { margin: 0 }` outside `@layer` beats every
 Tailwind utility and was the entire cause of v1's off-centre layout. Global base rules go
-in `@layer base`. Full evidence in spec §0.2.
+in `@layer base`. Full evidence in spec §0.2 — and there is now an article about it at
+`/insights/unlayered-css-resets`.
 
 **Never build a cool→warm multi-hue gradient.** Cyan cannot reach the warm end of this
 palette without crossing green or grey — measured, not aesthetic judgement. Headlines use
@@ -67,48 +86,56 @@ to `1`. Numeric theme tokens use the explicit three-tier pattern. Spec §2.6.
 
 **`Reveal` needs `disabled` when a list re-renders from a user action** (filter, sort,
 tab) rather than from scrolling. Otherwise results start invisible and the 1200ms failsafe
-becomes the primary path — the list sits blank for over a second. See `/work`.
+becomes the primary path — the list sits blank for over a second. See `/work` and
+`/insights`.
 
-**Scroll must go through `useScrollTo`**, never `window.scrollTo`. Lenis holds its own
-target position and will animate back.
+**Scroll must go through `useScrollTo`**, never `window.scrollTo` and never a bare `#`
+anchor. Lenis holds its own target position and will animate back. The article and legal
+contents rails are real anchors with a handler for exactly this reason.
 
 **Sections must clip.** `Section` handles it, but any new section that renders decoration
 outside that component can push the document wider than the viewport and break centring
-everywhere.
+everywhere. Code blocks scroll inside themselves for the same reason.
 
 **One signature scroll effect per page** (pinned or scrubbed). Home's is the process
 timeline spine; About's is the story timeline spine. More than one per page makes it feel
 unresponsive.
 
 **Prices are looked up, never restated.** `pricingTiers` carries a numeric `amount` and
-derives its display string from it. `/process`, `/pricing`'s estimator and `/contact`'s
+derives its display string from it. `/process`, the pricing estimator and `/contact`'s
 minimum-budget note all read from it. Do not type `£28k` into a page.
+
+**Content that describes other content must be derived.** Reading time, article contents
+lists, bylines, the 404 search index and the insights tag filter are all computed from
+their source. Nothing in `src/content` restates a fact that lives in another file.
 
 **`innerText` returns text as rendered.** Every eyebrow is `text-transform: uppercase`, so
 a case-sensitive assertion on a section label tests the stylesheet. Collapsed accordion
-panels are unmounted, so they do not count toward word totals either. Both bit me while
-writing `verify-pages`.
+panels are unmounted, so they do not count toward word totals either.
 
 ---
 
 ## Known open items
 
-- **Bundle is ~680kB raw / ~227kB gzip in one chunk** (framer-motion + GSAP + router).
+- **The ⌘K CommandPalette (§4.3) was never built.** It belonged to step 3 and was missed.
+  `content/siteIndex.js` and its `searchSite()` are exactly the data and matcher it needs,
+  so what remains is UI only: a dialog, a focus trap (copy `MobileMenu`'s) and a key
+  binding.
+- **Bundle is 681kB raw / 227kB gzip in one chunk** (framer-motion + GSAP + router).
   Flagged in step 5, deferred to step 10. GSAP is used by three components and could load
   lazily.
+- **Legal copy is a draft.** Both documents carry a visible notice saying so. It is written
+  against what the site actually does and is a real starting point for counsel, but it has
+  not been reviewed by a lawyer and must not ship as though it has. Removing the `notice`
+  field in `content/legal.js` is the deliberate act that drops the banner.
 - **No backend for the contact form.** An explicit non-goal (§1). `submitEnquiry` in
-  `src/pages/Contact.jsx` is the single seam — it resolves the shape a real endpoint would,
-  so wiring one is a one-function change. Do not add one without asking.
+  `src/pages/Contact.jsx` is the single seam. Do not add one without asking.
 - **`ArchitectureDiagram`'s omitted-section branch is unreachable.** Every service now has
   a related case study, so the "no related work" path in `ServiceDetail` never runs.
-  Defensive code kept, but nothing exercises it.
-- **Playwright is not in `package.json`.** `npm run verify` needs it. It was installed for
-  this session with `npm install --no-save playwright && npx playwright install chromium`,
-  which deliberately leaves `package.json` alone. Add it properly when you want the suites
-  in CI.
+- **Playwright is not in `package.json`.** `npm run verify` needs it. Installed for these
+  sessions with `npm install --no-save playwright && npx playwright install chromium`,
+  which deliberately leaves `package.json` alone. Add it properly when you want CI.
 - **`src/dev/LayoutProbe.jsx` still exists** and is unmounted. Delete at final cutover.
-- **Four `site-*.png` screenshots sit untracked in the repo root.** Not mine, not
-  committed — decide whether they belong in the repo or in `.gitignore`.
 - **Nothing is pushed.** Remote is `git@github.com:nomanfarooq/simple-logicx-landing-site.git`,
   default branch `main`.
 

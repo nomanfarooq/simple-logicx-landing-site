@@ -1,10 +1,11 @@
 import { chromium } from 'playwright'
 
 /**
- * Step 8 pages: /about, /process, /pricing, /contact.
+ * The site's static pages: /about, /process, /pricing, /contact (step 8) and
+ * /legal/* plus /404 (step 9). Articles have their own suite, verify-insights.
  *
- * These four were the thinnest routes on the site and are the ones most likely
- * to silently regress to placeholders, so the composition checks are explicit
+ * These were the thinnest routes on the site and are the ones most likely to
+ * silently regress to placeholders, so the composition checks are explicit
  * about which sections must exist rather than only counting words.
  *
  * The pricing estimator is checked arithmetically against the published tier
@@ -252,6 +253,122 @@ const PLACEHOLDER = /land in step \d|authored in step \d|lorem ipsum/i
   ok(cleared === '', 'contact   form resets after a successful submit')
 }
 
+/* ───────────────────────────── /legal ───────────────────────────── */
+for (const doc of ['privacy', 'terms']) {
+  const r = await page(`/legal/${doc}`)
+  const t = r.text
+  const structure = await p.evaluate(() => ({
+    bodyHeadings: [...document.querySelectorAll('main h2[id]')].map(h => h.id),
+    // Anchors only. The same nav also carries a cross-link to the other legal
+    // document, which is a route rather than a section.
+    tocTargets: [...document.querySelectorAll('nav[aria-label="On this page"] ol a[href^="#"]')]
+      .map(a => a.getAttribute('href').slice(1)),
+    notice: document.querySelectorAll('main [role="note"]').length,
+    crossLink: document.querySelectorAll('main nav a[href^="/legal/"]').length,
+  }))
+
+  const problems = []
+  if (PLACEHOLDER.test(t)) problems.push('placeholder copy still present')
+  if (has(t, 'supplied by counsel before launch')) problems.push('stub copy still present')
+  // The draft banner is the load-bearing part: this copy has not been reviewed
+  // by a lawyer and the page must not imply otherwise.
+  if (structure.notice !== 1) problems.push(`draft notice count=${structure.notice}, expected 1`)
+  if (!has(t, 'pending legal review')) problems.push('draft notice does not say it is unreviewed')
+  if (!has(t, 'Last updated')) problems.push('no last-updated date')
+  if (structure.bodyHeadings.length < 6) problems.push(`only ${structure.bodyHeadings.length} sections`)
+  if (structure.tocTargets.join('|') !== structure.bodyHeadings.join('|'))
+    problems.push('toc does not match the body headings')
+  if (structure.crossLink < 1) problems.push('no link to the other legal document')
+  if (!r.ld.includes('BreadcrumbList')) problems.push('no breadcrumb')
+  if (r.h1 !== 1) problems.push(`h1 count=${r.h1}`)
+  if (words(t) < 700) problems.push(`thin content (${words(t)} words)`)
+  if (r.stranded > 0) problems.push(`${r.stranded} stranded elements`)
+
+  // Each document must actually be about its own subject.
+  const subject = doc === 'privacy'
+    ? ['data controller', 'UK GDPR', 'Your rights', 'retention|How long we keep']
+    : ['Governing law', 'Liability', 'Intellectual property', 'Nothing here is an offer']
+  for (const s of subject) if (!has(t, s)) problems.push(`missing section: ${s}`)
+
+  ok(problems.length === 0,
+    `/legal/${doc.padEnd(8)} ${String(words(t)).padStart(4)} words | ${structure.bodyHeadings.length} sections` +
+    (problems.length ? `\n       ${problems.join(', ')}` : ''))
+}
+
+/* Privacy copy must describe what the site actually does. These four claims
+   are the ones that would become false if a tracker were ever added. */
+{
+  await p.goto(BASE + '/legal/privacy', { waitUntil: 'networkidle' })
+  const t = await p.evaluate(() => document.querySelector('main').innerText)
+  const claims = {
+    'no analytics': /no analytics/i.test(t),
+    'no tracking cookies': /advertising or tracking cookies/i.test(t),
+    'self-hosted fonts': /own domain rather than a font CDN/i.test(t),
+    'theme in local storage': /local storage/i.test(t),
+  }
+  const cookies = await p.evaluate(async () => (await navigator.cookieEnabled) ? document.cookie : '')
+  // data: and blob: resources parse to an empty host — they are inline, not a
+  // third party, and counting them made this fail against its own message.
+  const thirdParty = await p.evaluate(() =>
+    performance.getEntriesByType('resource')
+      .map(r => { try { return new URL(r.name).host } catch { return '' } })
+      .filter(h => h && h !== location.host))
+
+  ok(Object.values(claims).every(Boolean),
+    `privacy   states all four claims (${Object.entries(claims).filter(([, v]) => !v).map(([k]) => k).join(', ') || 'all present'})`)
+  ok(cookies === '', `privacy   claim holds: site sets no cookies (document.cookie="${cookies}")`)
+  ok(thirdParty.length === 0,
+    `privacy   claim holds: no third-party requests (${thirdParty.join(', ') || 'none'})`)
+}
+
+/* ────────────────────────────── /404 ────────────────────────────── */
+{
+  const r = await page('/this-route-does-not-exist')
+  const t = r.text
+  const problems = []
+  if (r.h1 !== 1) problems.push(`h1 count=${r.h1}`)
+  if (!has(t, 'does not exist')) problems.push('no 404 message')
+  if (!/404/.test(t)) problems.push('not branded as 404')
+  // §4.1 asks for search AND suggested routes.
+  if (await p.locator('main [role="search"] input').count() !== 1) problems.push('no search field')
+  if (await p.locator('main nav[aria-label="Suggested pages"] a').count() < 5) problems.push('no suggested routes')
+  if (!has(t, 'Requested: /this-route-does-not-exist')) problems.push('does not echo the requested path')
+  if (r.stranded > 0) problems.push(`${r.stranded} stranded elements`)
+  ok(problems.length === 0, `/404      branded, search + suggestions` +
+    (problems.length ? `\n       ${problems.join(', ')}` : ''))
+
+  const field = p.locator('main [role="search"] input')
+
+  /* Search runs over a derived index, so a query for content added after the
+     404 page was written must still find it. */
+  const cases = [
+    { q: 'northwind', expect: '/work/northwind-logistics' },
+    { q: 'rag', expect: '/insights/evaluating-rag-honestly' },
+    { q: 'kubernetes', expect: '/services/' },
+    { q: 'privacy', expect: '/legal/privacy' },
+  ]
+  for (const c of cases) {
+    await field.fill(c.q)
+    await p.waitForTimeout(200)
+    const hrefs = await p.evaluate(() =>
+      [...document.querySelectorAll('main ul a')].map(a => a.getAttribute('href')))
+    ok(hrefs.some(h => h.startsWith(c.expect)),
+      `404 search "${c.q}" → ${hrefs.slice(0, 3).join(' ') || 'nothing'}`)
+  }
+
+  /* No fuzzy fallback: nonsense must say nothing matched rather than guess. */
+  await field.fill('qzxwvu')
+  await p.waitForTimeout(200)
+  const empty = await p.evaluate(() => document.querySelector('main').innerText)
+  ok(/Nothing matched/i.test(empty), '404 search reports no match instead of guessing')
+
+  /* Below the two-character floor, search must not run at all. */
+  await field.fill('a')
+  await p.waitForTimeout(200)
+  const short = await p.evaluate(() => document.querySelector('main').innerText)
+  ok(!/Nothing matched/i.test(short), '404 search stays quiet below two characters')
+}
+
 await b.close()
-console.log(fail === 0 ? '\nALL STEP-8 PAGE CHECKS PASSED' : `\n${fail} FAILED`)
+console.log(fail === 0 ? '\nALL PAGE CHECKS PASSED' : `\n${fail} FAILED`)
 process.exit(fail ? 1 : 0)

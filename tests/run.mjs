@@ -24,6 +24,7 @@ const PREVIEW_SUITES = [
   "verify-services.mjs",
   "verify-work.mjs",
   "verify-pages.mjs",
+  "verify-insights.mjs",
   "verify-interactions.mjs",
   "verify-nogreen.mjs",
   "sanity-green.mjs",

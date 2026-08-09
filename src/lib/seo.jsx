@@ -116,6 +116,34 @@ export function caseStudyJsonLd(study) {
   };
 }
 
+/**
+ * Article schema for an insights post. `wordCount` and `timeRequired` come
+ * from the derived values in content/insights.js rather than being restated,
+ * so the structured data cannot claim a length the page does not have.
+ */
+export function articleJsonLd(post) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    url: `${BASE_URL}/insights/${post.slug}`,
+    datePublished: post.date,
+    dateModified: post.date,
+    articleSection: post.tag,
+    wordCount: post.words,
+    // ISO 8601 duration — "6 min" becomes "PT6M".
+    timeRequired: `PT${parseInt(post.readingTime, 10)}M`,
+    author: {
+      "@type": "Person",
+      name: post.author.name,
+      jobTitle: post.author.role,
+      worksFor: { "@type": "Organization", name: SITE, url: BASE_URL },
+    },
+    publisher: { "@type": "Organization", name: SITE, url: BASE_URL },
+  };
+}
+
 export function breadcrumbJsonLd(trail) {
   return {
     "@context": "https://schema.org",

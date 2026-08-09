@@ -42,7 +42,8 @@ server: `URL=http://localhost:4173 node tests/verify-routes.mjs`.
 | `verify-routes` | All 22 route patterns × 2 themes: title, description, canonical, exactly one `h1`, nav/footer/skip-link, zero overflow and zero container asymmetry at 375/768/1440/2560, plus client-side nav, scroll reset and focus handoff |
 | `verify-services` | 7 service pages: section composition, word count, `Service` + `BreadcrumbList` schema, no stranded elements |
 | `verify-work` | 5 case studies: composition, 4-stage diagram, `Article` schema, next-case wrap-around; index filtering, `aria-pressed`, live-region count, and that filtered results render **immediately** |
-| `verify-pages` | `/about`, `/process`, `/pricing`, `/contact`: section composition, schema, no leftover placeholder copy, pricing estimator arithmetic against the tier prices read off the same page, contact form labelling, constraint validation, conditional budget note and submit/reset |
+| `verify-pages` | `/about`, `/process`, `/pricing`, `/contact`, `/legal/*`, `/404`: section composition, schema, no leftover placeholder copy, pricing estimator arithmetic against the tier prices read off the same page, contact form labelling and validation, the legal draft notice, the privacy policy's four factual claims checked against the running page, and 404 search over the derived site index |
+| `verify-insights` | Index filtering and immediate filtered render; 3 articles: derived reading time checked against the schema's own word count, contents list generated from and matching the body headings, `Article` + `BreadcrumbList` schema, code samples that scroll rather than widening the document, read-next wrap-around, and that a contents link actually scrolls under Lenis |
 | `verify-interactions` | Mega-menu (hover/keyboard/Escape/navigate), theme toggle + persistence + no flash, FAQ accordion, mobile dialog focus trap and scroll lock |
 | `verify-nogreen` | Samples 300 points across every approved gradient and fails on any green-hued pixel with real saturation |
 | `sanity-green` | Proves the green detector is not vacuous by running it against v1's actual gradients — `cyan → lime` scores 205/300 |
@@ -73,6 +74,17 @@ Several are deliberately tight and will look arbitrary otherwise:
 - **Assertions on section labels are case-insensitive.** `innerText` returns text as
   rendered, and every eyebrow on the site is `text-transform: uppercase`. A case-sensitive
   match there tests the stylesheet, not the content.
+- **`verify-insights` checks derived values against what they are derived from.** Reading
+  time is compared to the word count in the page's own `Article` schema, and the contents
+  list is compared to the body's `h2` ids — never to a literal. Both are computed in
+  `content/insights.js`; hardcoding either here would let them drift apart silently.
+- **The privacy policy's factual claims are executed, not read.** `verify-pages` asserts
+  `document.cookie` is empty and that the page issues zero third-party requests, because
+  those are claims the policy makes in prose. Adding an analytics script must fail a test,
+  not just contradict a paragraph nobody re-reads.
+- **404 search is asserted to find content added after it was written** — a case study, an
+  article, a service by its stack, a legal page. That is the property that matters: the
+  index is derived from the content files, so it cannot go stale.
 
 ## `NODE_ENV` and the dev server
 
