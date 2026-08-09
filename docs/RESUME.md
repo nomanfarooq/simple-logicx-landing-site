@@ -10,7 +10,7 @@ what to build and why; this file is only the bookmark.
 ## Where things stand
 
 ```
-(step 8)  Build About, Process, Pricing and Contact                (this commit)
+ce58769   Build About, Process, Pricing and Contact                (step 8)
 a4f42ea   Add full case study narratives and filterable work index (step 7)
 bcd5077   Update spec: mark step 6 complete
 72509b2   Add service detail pages and two case studies            (step 6)
