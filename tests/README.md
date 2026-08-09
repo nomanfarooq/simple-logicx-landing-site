@@ -6,12 +6,15 @@ easy to regress silently.
 
 ## Setup
 
-Playwright is **not** currently in `package.json`. Install it before the first run:
+`playwright`, `lighthouse` and `axe-core` are in `devDependencies`, so `npm install` covers
+the packages. The browser binaries are separate and must be fetched once:
 
 ```bash
-npm install -D playwright
-npx playwright install chromium
+npx playwright install chromium firefox webkit
 ```
+
+Chromium alone is enough for everything except `verify-cross-browser`, which needs all
+three.
 
 ## Running
 
@@ -20,6 +23,8 @@ npm run verify                 # build, start servers, run everything
 npm run verify routes          # one suite (substring match on the filename)
 npm run verify work motion     # several
 ```
+
+Lighthouse is deliberately **not** part of `npm run verify` — see the note below.
 
 `tests/run.mjs` builds, then starts the servers through Vite's Node API. It does not spawn
 `npx vite`, because killing that process tree is unreliable on Windows and tends to leave
@@ -45,9 +50,33 @@ server: `URL=http://localhost:4173 node tests/verify-routes.mjs`.
 | `verify-pages` | `/about`, `/process`, `/pricing`, `/contact`, `/legal/*`, `/404`: section composition, schema, no leftover placeholder copy, pricing estimator arithmetic against the tier prices read off the same page, contact form labelling and validation, the legal draft notice, the privacy policy's four factual claims checked against the running page, and 404 search over the derived site index |
 | `verify-insights` | Index filtering and immediate filtered render; 3 articles: derived reading time checked against the schema's own word count, contents list generated from and matching the body headings, `Article` + `BreadcrumbList` schema, code samples that scroll rather than widening the document, read-next wrap-around, and that a contents link actually scrolls under Lenis |
 | `verify-interactions` | Mega-menu (hover/keyboard/Escape/navigate), theme toggle + persistence + no flash, FAQ accordion, mobile dialog focus trap and scroll lock |
+| `verify-contrast` | WCAG AA over every text node on 25 routes × 2 themes. Composites the whole ancestor stack rather than reading `color` against `background-color`, because the ink and surface tokens both carry alpha, and enumerates gradient stops so a ramp is measured at its worst point |
+| `verify-a11y` | Names, roles, relationships, heading order, and the WCAG 2.2 additions that apply here (2.5.8 target size, 3.3.2 visible labels). Hand-written, and scoped to defects this project specifically has |
+| `verify-axe` | axe-core over 16 routes × 2 themes plus the mega-menu, mobile dialog and command palette in their **open** states. Overlaps `verify-a11y` on purpose — see the note below |
+| `verify-keyboard` | Every interaction driven by real key events only, with no `click()` anywhere, so a pass means the interaction genuinely works without a mouse |
+| `verify-cross-browser` | Chromium + Firefox + WebKit: centring and overflow at 4 widths × 2 themes, `light-dark()` actually painting, cascade-layer precedence, skip-link focus handoff, smooth scroll settling, and the ⌘K palette keyboard path |
+| `verify-reduced-motion` | All 25 routes under `prefers-reduced-motion`. Sweeps rather than samples, because the failure mode is silent and total: content that never becomes visible |
 | `verify-nogreen` | Samples 300 points across every approved gradient and fails on any green-hued pixel with real saturation |
 | `sanity-green` | Proves the green detector is not vacuous by running it against v1's actual gradients — `cyan → lime` scores 205/300 |
 | `verify-motion` | Lenis active and sharing one ticker with ScrollTrigger, no trigger leak across navigation, seamless marquee geometry, counters settling on authored values, nothing stranded below opacity 0.9, and full reduced-motion behaviour |
+
+## Lighthouse
+
+Not part of `npm run verify`. Scores move with machine load, and a suite that fails
+because something else was compiling is a suite people learn to ignore.
+
+```bash
+npm run build
+npx vite preview --port 4173 &
+node tests/lighthouse.mjs                        # mobile (default)
+FORM=desktop node tests/lighthouse.mjs           # desktop
+ROUTE=/pricing node tests/lighthouse-detail.mjs  # item-level detail for one route
+```
+
+`lighthouse.mjs` reports scores across six representative routes; `lighthouse-detail.mjs`
+prints the audit items behind one route's failures — which element shifted, which bytes
+went unused. That detail is what names a fix, and it is far too verbose to print for six
+routes at once.
 
 ## Notes on the assertions
 
@@ -85,6 +114,36 @@ Several are deliberately tight and will look arbitrary otherwise:
 - **404 search is asserted to find content added after it was written** — a case study, an
   article, a service by its stack, a legal page. That is the property that matters: the
   index is derived from the content files, so it cannot go stale.
+- **`verify-axe` and `verify-a11y` overlap on purpose, and neither replaces the other.**
+  A hand-written audit grades its own homework: it can only fail on defects someone already
+  thought of. axe encodes several hundred rules maintained by people who do this full time,
+  and it found two real violations on its first run that `verify-a11y` had no check for.
+  Going the other way, axe only ever sees the DOM in front of it — it cannot assert that
+  focus moves to the right place on a route change, and it cannot open a mega-menu. That is
+  why `verify-axe` explicitly drives the three overlays open before auditing them: a dialog
+  that is never opened is a dialog that is never audited.
+- **`verify-axe` has `color-contrast` disabled.** `verify-contrast` owns that, and it
+  composites the whole ancestor stack. axe reads `background-color` off the nearest painted
+  ancestor and returns "incomplete" for anything behind a gradient or a `backdrop-filter`,
+  which describes most of this site. Two contrast reports that disagree are worse than one
+  that is trusted.
+- **`verify-cross-browser` measures against `documentElement.clientWidth`, never
+  `window.innerWidth`.** `innerWidth` includes the scrollbar gutter, and WebKit reserves a
+  classic 10px scrollbar where Chromium and Firefox use a zero-width overlay — so an
+  `innerWidth` comparison reports a perfectly centred container as 10px off, in exactly one
+  engine. That is the measurement being wrong, not the layout.
+- **It focuses the skip link directly instead of pressing Tab.** WebKit does not put links
+  in the sequential tab order by default — that is Safari's "Press Tab to highlight each
+  item on a webpage" preference, which ships off. Asserting "the skip link is the first tab
+  stop" would fail in WebKit on a correctly built page. What the suite asserts instead is
+  the part that is ours: that activating it moves focus into `<main>`.
+- **Its palette checks wait on state, never on a fixed delay.** The palette binds its
+  Escape listener in an effect that runs when it opens, so pressing Escape before that
+  commits is swallowed. A fixed 250ms wait passed standalone and failed under load, in one
+  engine — a flake that looked exactly like a real bug.
+- **Playwright's `webkit` is not Safari.** It shares WebCore and JavaScriptCore, so it
+  catches engine-level differences, but a pass means "no engine-level defect found", not
+  "verified on Safari". Real Safari on macOS/iOS is still a manual check.
 
 ## `NODE_ENV` and the dev server
 

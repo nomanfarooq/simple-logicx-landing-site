@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SimpleLogicX">
+  <!--
+    The logo mark, matching components/ui/Logo.jsx: a rounded square filled
+    with grad-primary (Deep Blue #0A5A7E -> Cyan #35CCD9).
+
+    The hex values are written out rather than referencing theme tokens because
+    a favicon is fetched as a standalone document — it has no access to the
+    page's custom properties. This is the one place raw brand hex is correct.
+    It is theme-invariant for the same reason the mark itself is: the gradient
+    reads on both a light and a dark browser chrome.
+  -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A5A7E"/>
+      <stop offset="1" stop-color="#35CCD9"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#g)"/>
+  <text x="32" y="42" text-anchor="middle"
+        font-family="'Space Grotesk','Segoe UI',system-ui,sans-serif"
+        font-size="26" font-weight="700" fill="#FFFFFF" letter-spacing="-0.5">SL</text>
+</svg>

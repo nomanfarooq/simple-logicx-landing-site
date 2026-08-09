@@ -1,0 +1,14 @@
+# SimpleLogicX
+#
+# There is nothing on this site that should not be indexed — it is a marketing
+# site with no accounts, no user content and no private areas. So this file
+# allows everything rather than listing disallows it does not need.
+#
+# /404 is excluded because it is a real, reachable route (the router renders
+# NotFound there) and an indexed "page not found" is a wasted result.
+
+User-agent: *
+Allow: /
+Disallow: /404
+
+Sitemap: https://simplelogicx.com/sitemap.xml

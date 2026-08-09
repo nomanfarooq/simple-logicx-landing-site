@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import Container from "../ui/Container";
 import Button from "../ui/Button";
 import Logo from "../ui/Logo";
@@ -17,11 +17,18 @@ import { cn } from "../../lib/cn";
  * so it cannot overlap the first section or require a magic top-padding
  * elsewhere — which is the usual source of "the hero is 80px too short".
  */
-export default function Navbar() {
+export default function Navbar({ onOpenSearch }) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isMac, setIsMac] = useState(false);
   const burgerRef = useRef(null);
   const { pathname } = useLocation();
+
+  // Read after mount, not during render: the hint text differs per platform and
+  // rendering the wrong one first would be a visible swap on hydration.
+  useEffect(() => {
+    setIsMac(/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent));
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -82,6 +89,32 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {/* Search trigger. The ⌘K binding lives in RootLayout; this is what
+              makes it discoverable, and it is the only way to reach the
+              palette by pointer.
+
+              The shortcut is repeated in the accessible name on purpose. WCAG
+              2.5.3 requires the name to contain the visible label, and the
+              hint is visible text however decorative it looks — naming this
+              only "Search the site" failed the check for the same reason the
+              logo did. aria-keyshortcuts is what actually tells assistive tech
+              about the binding; the label just has to agree with the pixels. */}
+          <button
+            type="button"
+            onClick={onOpenSearch}
+            aria-label={`Search the site — ${isMac ? "⌘K" : "Ctrl K"}`}
+            aria-keyshortcuts="Meta+K Control+K"
+            className="group grid h-10 min-w-10 place-items-center rounded-(--radius-pill) border border-line text-ink-soft transition-colors hover:bg-surface hover:text-ink md:flex md:items-center md:gap-2 md:px-3"
+          >
+            <Search aria-hidden="true" className="size-4" />
+            <span
+              aria-hidden="true"
+              className="hidden font-mono text-[11px] text-ink-muted md:inline"
+            >
+              {isMac ? "⌘K" : "Ctrl K"}
+            </span>
+          </button>
+
           <ThemeToggle />
           <Button to="/contact" className="hidden sm:inline-flex">
             Start a project

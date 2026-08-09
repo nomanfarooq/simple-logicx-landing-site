@@ -24,7 +24,12 @@ export default function Testimonials() {
         {testimonials.map((t) => (
           <RevealItem as="li" key={t.name} className="h-full">
             <figure className="flex h-full flex-col rounded-(--radius-card) border border-line bg-surface p-7">
-              <div aria-label="Five out of five" className="flex gap-1">
+              {/* role="img" is required, not decorative: aria-label is only
+                  honoured on elements with a role that supports naming, so on
+                  a bare <div> it is silently dropped and the rating is
+                  announced as five unlabelled graphics. Caught by axe
+                  (aria-prohibited-attr). */}
+              <div role="img" aria-label="Five out of five" className="flex gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
