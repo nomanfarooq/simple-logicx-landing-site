@@ -10,7 +10,7 @@ what to build and why; this file is only the bookmark.
 ## Where things stand
 
 ```
-(step 9)  Write insights, legal and 404 search                     (this commit)
+accdc59   Write insights, legal and 404 search                     (step 9)
 3f5450a   Record the step 8 commit hash in the resume log
 ce58769   Build About, Process, Pricing and Contact                (step 8)
 a4f42ea   Add full case study narratives and filterable work index (step 7)
