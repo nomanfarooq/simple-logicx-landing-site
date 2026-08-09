@@ -1,6 +1,6 @@
 # Resume log — SimpleLogicX v2 rebuild
 
-**Paused after step 7 of 10.** Branch `rebuild/v2-foundation`, **not pushed**.
+**Paused after step 8 of 10.** Branch `rebuild/v2-foundation`, **not pushed**.
 
 Read this first, then `docs/SimpleLogicX_Rebuild_Spec.md` — the spec is the authority on
 what to build and why; this file is only the bookmark.
@@ -10,11 +10,12 @@ what to build and why; this file is only the bookmark.
 ## Where things stand
 
 ```
-a4f42ea  Add full case study narratives and filterable work index      (step 7)
-bcd5077  Update spec: mark step 6 complete
-72509b2  Add service detail pages and two case studies                 (step 6)
-feaca8b  Rebuild site foundation: fix centring and palette, …          (steps 1–5)
-5294b6b  initial commit landing site                                   (v1, deleted in step 5)
+(step 8)  Build About, Process, Pricing and Contact                (this commit)
+a4f42ea   Add full case study narratives and filterable work index (step 7)
+bcd5077   Update spec: mark step 6 complete
+72509b2   Add service detail pages and two case studies            (step 6)
+feaca8b   Rebuild site foundation: fix centring and palette, …     (steps 1–5)
+5294b6b   initial commit landing site                              (v1, deleted in step 5)
 ```
 
 | Step | Status |
@@ -26,31 +27,28 @@ feaca8b  Rebuild site foundation: fix centring and palette, …          (steps 
 | 5. Home, section by section | done |
 | 6. Services index + 7 detail pages | done |
 | 7. Work index + 5 case studies | done |
-| **8. About, Process, Pricing, Contact** | **next** |
-| 9. Insights, Legal, 404 | not started |
+| 8. About, Process, Pricing, Contact | done |
+| **9. Insights, Legal, 404** | **next** |
 | 10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass | not started |
 
-All suites currently green: 46/46 routes, 14/14 work, 7/7 services, 20/20 interactions,
-12/12 motion, 4/4 gradients.
+All 8 suites green: routes, services, work, **pages (new)**, interactions, no-green,
+sanity-green, motion.
 
 ---
 
 ## Pick up here
 
-**Step 8 — About, Process, Pricing, Contact.** These are the thinnest pages on the site.
+**Step 9 — Insights, Legal, 404.**
 
-- **About** is the weakest: a two-paragraph placeholder with a literal "land in step 8"
-  sentence in the copy. Needs story timeline, values, team grid, locations, careers.
-  Content should go in `src/content/team.js` (does not exist yet), following the pattern
-  of the other content files.
-- **Process** and **Pricing** already reuse shared sections (`ProcessTimeline`,
-  `pricingTiers`) and are in reasonable shape. Pricing could use the TCO calculator the
-  spec mentions in §4.1; Process could use engagement-model detail.
-- **Contact** ships a validated form with a pluggable submit handler. A backend is an
-  explicit non-goal (§1) — do not add one without asking.
+- **Insights** is an index over `src/content/insights.js` with no article bodies. `Article.jsx`
+  still carries a literal "authored in step 9" sentence in its copy, and the header comment
+  in `insights.js` says the same. Both must be gone before step 10.
+- **Legal** (`/legal/privacy`, `/legal/terms`) and **404** are the other two.
+  §4.1 wants the 404 branded, with search and suggested routes.
+- Article bodies are the real work here. The case studies in `caseStudies.js` are the
+  model for how long-form content is structured and how specific the writing has to be.
 
-Grep for `step 8` and `step 9` in `src/pages/` — the placeholder pages say which step
-fills them in, and those sentences must all be gone before step 10.
+Grep for `step 9` in `src/` — the placeholder pages say which step fills them in.
 
 ---
 
@@ -79,24 +77,52 @@ outside that component can push the document wider than the viewport and break c
 everywhere.
 
 **One signature scroll effect per page** (pinned or scrubbed). Home's is the process
-timeline spine. More than one makes a page feel unresponsive.
+timeline spine; About's is the story timeline spine. More than one per page makes it feel
+unresponsive.
+
+**Prices are looked up, never restated.** `pricingTiers` carries a numeric `amount` and
+derives its display string from it. `/process`, `/pricing`'s estimator and `/contact`'s
+minimum-budget note all read from it. Do not type `£28k` into a page.
+
+**`innerText` returns text as rendered.** Every eyebrow is `text-transform: uppercase`, so
+a case-sensitive assertion on a section label tests the stylesheet. Collapsed accordion
+panels are unmounted, so they do not count toward word totals either. Both bit me while
+writing `verify-pages`.
 
 ---
 
 ## Known open items
 
-- **Bundle is ~642kB raw / ~200kB gzip in one chunk** (framer-motion + GSAP + router).
-  Flagged in step 5, deferred to step 10. GSAP is used by two components and could load
+- **Bundle is ~680kB raw / ~227kB gzip in one chunk** (framer-motion + GSAP + router).
+  Flagged in step 5, deferred to step 10. GSAP is used by three components and could load
   lazily.
+- **No backend for the contact form.** An explicit non-goal (§1). `submitEnquiry` in
+  `src/pages/Contact.jsx` is the single seam — it resolves the shape a real endpoint would,
+  so wiring one is a one-function change. Do not add one without asking.
 - **`ArchitectureDiagram`'s omitted-section branch is unreachable.** Every service now has
   a related case study, so the "no related work" path in `ServiceDetail` never runs.
   Defensive code kept, but nothing exercises it.
-- **Playwright is not in `package.json`.** `npm run verify` needs
-  `npm install -D playwright && npx playwright install chromium` first. Left out
-  deliberately — add it when you want the suites in CI.
+- **Playwright is not in `package.json`.** `npm run verify` needs it. It was installed for
+  this session with `npm install --no-save playwright && npx playwright install chromium`,
+  which deliberately leaves `package.json` alone. Add it properly when you want the suites
+  in CI.
 - **`src/dev/LayoutProbe.jsx` still exists** and is unmounted. Delete at final cutover.
+- **Four `site-*.png` screenshots sit untracked in the repo root.** Not mine, not
+  committed — decide whether they belong in the repo or in `.gitignore`.
 - **Nothing is pushed.** Remote is `git@github.com:nomanfarooq/simple-logicx-landing-site.git`,
   default branch `main`.
+
+---
+
+## Fixed in step 8, worth knowing
+
+**`verify-motion` had never passed under `npm run verify`.** `run.mjs` calls Vite's
+`build()` first, which sets `NODE_ENV=production` on the process and leaves it there; the
+dev server created afterwards therefore had `import.meta.env.DEV` false, which strips the
+dev-only `window.__SLX` handle from `src/lib/gsap.js`. The suite failed on a missing handle
+rather than on anything it tests. It passed standalone against `npm run dev`, which is how
+the step-4 "12/12" reading was taken. `run.mjs` now resets `NODE_ENV` before
+`createServer`. See `tests/README.md`.
 
 ---
 

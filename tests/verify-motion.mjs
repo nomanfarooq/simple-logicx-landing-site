@@ -12,6 +12,12 @@ const errors = []
 page.on('pageerror', (e) => errors.push(e.message))
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()) })
 await page.goto(BASE + '/', { waitUntil: 'networkidle' })
+// Wait for the app's own dev handle rather than a fixed delay. On a cold dep
+// cache Vite re-optimises after the first request and forces a full reload
+// that lands *after* networkidle, wiping window state — so a timeout long
+// enough on a warm run throws on a cold one. This is what made the suite fail
+// only when `npm run verify` had just run a build in the same process.
+await page.waitForFunction(() => !!window.__SLX, null, { timeout: 15000 })
 await page.waitForTimeout(900)
 
 ok(await page.evaluate(() => document.documentElement.classList.contains('lenis')),

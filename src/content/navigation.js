@@ -50,10 +50,36 @@ export const footerNav = [
   },
 ];
 
+/**
+ * Offices. `city`, `region` and `timezone` are the fields the footer and the
+ * contact panel use; `since`, `headcount` and `role` are extra detail the
+ * about page shows and everything else ignores.
+ */
 export const offices = [
-  { city: "London", region: "United Kingdom", timezone: "GMT" },
-  { city: "Lahore", region: "Pakistan", timezone: "PKT" },
-  { city: "Dubai", region: "United Arab Emirates", timezone: "GST" },
+  {
+    city: "London",
+    region: "United Kingdom",
+    timezone: "GMT",
+    since: "2014",
+    headcount: "14 people",
+    role: "Discovery, architecture and design. Where most engagements start and where the client-facing principals sit.",
+  },
+  {
+    city: "Lahore",
+    region: "Pakistan",
+    timezone: "PKT",
+    since: "2016",
+    headcount: "22 people",
+    role: "The largest engineering office: platform, data and mobile practices, plus the shared deployment tooling every engagement inherits.",
+  },
+  {
+    city: "Dubai",
+    region: "United Arab Emirates",
+    timezone: "GST",
+    since: "2022",
+    headcount: "8 people",
+    role: "Regional enterprise programmes, applied AI, and the procurement and compliance work multi-squad engagements need.",
+  },
 ];
 
 export const socials = [

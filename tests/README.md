@@ -42,6 +42,7 @@ server: `URL=http://localhost:4173 node tests/verify-routes.mjs`.
 | `verify-routes` | All 22 route patterns × 2 themes: title, description, canonical, exactly one `h1`, nav/footer/skip-link, zero overflow and zero container asymmetry at 375/768/1440/2560, plus client-side nav, scroll reset and focus handoff |
 | `verify-services` | 7 service pages: section composition, word count, `Service` + `BreadcrumbList` schema, no stranded elements |
 | `verify-work` | 5 case studies: composition, 4-stage diagram, `Article` schema, next-case wrap-around; index filtering, `aria-pressed`, live-region count, and that filtered results render **immediately** |
+| `verify-pages` | `/about`, `/process`, `/pricing`, `/contact`: section composition, schema, no leftover placeholder copy, pricing estimator arithmetic against the tier prices read off the same page, contact form labelling, constraint validation, conditional budget note and submit/reset |
 | `verify-interactions` | Mega-menu (hover/keyboard/Escape/navigate), theme toggle + persistence + no flash, FAQ accordion, mobile dialog focus trap and scroll lock |
 | `verify-nogreen` | Samples 300 points across every approved gradient and fails on any green-hued pixel with real saturation |
 | `sanity-green` | Proves the green detector is not vacuous by running it against v1's actual gradients — `cyan → lime` scores 205/300 |
@@ -62,6 +63,27 @@ Several are deliberately tight and will look arbitrary otherwise:
   appears is a broken page.
 - **`sanity-green` exists because a passing test proves nothing if it cannot fail.** It runs
   the detector against known-bad input.
+- **`verify-pages` compares the pricing estimator against prices it reads off the cards**,
+  not against literals. Hardcoding £12k/£28k here would let a price change break the site
+  and keep the suite green, which is the exact failure the shared `pricingTiers` prevents.
+- **Word-count floors in `verify-pages` are per page and deliberately low.** `innerText`
+  excludes collapsed accordion answers — those panels are unmounted while closed — so
+  `/pricing` reads ~400 words under what it contains. The floors catch a page regressing to
+  a stub; they are not a prose-length policy.
+- **Assertions on section labels are case-insensitive.** `innerText` returns text as
+  rendered, and every eyebrow on the site is `text-transform: uppercase`. A case-sensitive
+  match there tests the stylesheet, not the content.
+
+## `NODE_ENV` and the dev server
+
+`run.mjs` resets `process.env.NODE_ENV = "development"` before creating the dev server.
+This is load-bearing, not tidying: Vite's `build()` sets `NODE_ENV=production` on the
+process and leaves it set, so a dev server created afterwards has `import.meta.env.DEV`
+false. That strips the dev-only `window.__SLX` handle from `src/lib/gsap.js` and
+`verify-motion` fails on a missing handle rather than on anything it is testing. It failed
+this way from the moment the suite was written; the standalone form
+(`URL=… node tests/verify-motion.mjs` against `npm run dev`) always passed, which is how it
+went unnoticed.
 
 `src/dev/LayoutProbe.jsx` is the original centring harness. It is no longer mounted —
 `verify-routes` covers centring across every real route instead — but it can be rendered

@@ -685,7 +685,31 @@ Pages
    four columns to a stack, and the markup is already an ordered list of stages, so no
    parallel text description is needed. Text inside an SVG `viewBox` scales with the
    drawing and becomes unreadable on a phone.
-8. About, Process, Pricing, Contact
+8. ~~About, Process, Pricing, Contact~~ **DONE — 19/19 checks pass in the new
+   `verify-pages` suite.** About rebuilt per §4.4 (story timeline, values, team, locations,
+   careers); Process gained engagement models, delivery cadence and the client-side
+   commitments; Pricing gained the TCO estimator §4.1 asks for, plus scope in/out and a
+   commercial FAQ; Contact gained routing fields, a booking panel and a stated response
+   SLA. New content in `src/content/team.js` and `src/content/contact.js`.
+
+   **Prices are looked up, never restated.** `/process` and the `/contact` minimum-budget
+   note both read from `pricingTiers`, and the tier objects now carry a numeric `amount`
+   from which the display string is derived — so the estimator and the cards cannot
+   disagree. `verify-pages` asserts the estimator arithmetic against the prices it reads
+   off the cards rather than against hardcoded numbers.
+
+   **The estimator is not a "vs hiring in-house" comparison.** Those require invented
+   salary, recruitment and attrition figures for a company we know nothing about, and are
+   rigged by construction — nobody ships one whose arrow points at the competitor. It
+   computes the cost of the engagement itself and shows every assumption underneath. The
+   hire-instead question is answered honestly in words in the pricing FAQ instead.
+
+   **Fixed a pre-existing harness bug while verifying.** `tests/run.mjs` calls Vite's
+   `build()` before creating the dev server, and `build()` sets `NODE_ENV=production` on
+   the process and leaves it there. The dev server inherited it, so `import.meta.env.DEV`
+   was false, the dev-only `window.__SLX` handle in `lib/gsap.js` was stripped, and
+   `verify-motion` could not pass under `npm run verify` at all — including at step 4,
+   where it was recorded as passing. `run.mjs` now resets `NODE_ENV` first.
 9. Insights, Legal, 404
 10. Accessibility audit, Lighthouse, cross-browser, reduced-motion pass
 

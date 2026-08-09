@@ -23,6 +23,7 @@ const PREVIEW_SUITES = [
   "verify-routes.mjs",
   "verify-services.mjs",
   "verify-work.mjs",
+  "verify-pages.mjs",
   "verify-interactions.mjs",
   "verify-nogreen.mjs",
   "sanity-green.mjs",
@@ -62,6 +63,13 @@ if (previewSuites.length) {
 
 const devSuites = DEV_SUITES.filter(match);
 if (devSuites.length) {
+  // Vite's build() sets process.env.NODE_ENV = "production" on this process and
+  // leaves it there. A dev server created afterwards inherits it, so
+  // import.meta.env.DEV is false, the dev-only window.__SLX handle in
+  // lib/gsap.js is stripped, and verify-motion fails on a handle that is
+  // missing for build-order reasons rather than for anything it is testing.
+  process.env.NODE_ENV = "development";
+
   const server = await createServer({
     server: { port: 5199, strictPort: true },
     logLevel: "warn",
